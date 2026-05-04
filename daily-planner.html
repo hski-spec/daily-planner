@@ -380,6 +380,62 @@ textarea{resize:vertical;min-height:82px;line-height:1.6;}
 .text-muted{color:var(--ink3);}
 .text-sm{font-size:12px;}
 .fw500{font-weight:500;}
+
+/* ═══════════════════════════════════ CALENDAR */
+.cal-cell{
+  aspect-ratio:1;border-radius:8px;padding:4px 3px;
+  border:1px solid var(--border);background:var(--cream);
+  cursor:pointer;transition:all .15s;
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;overflow:hidden;
+  min-height:44px;
+}
+.cal-cell:active{border-color:var(--border2);}
+.cal-cell.today{border-color:var(--sage);background:var(--sage-lt);}
+.cal-cell.selected{border-color:var(--sage);border-width:2px;}
+.cal-cell.other-month{opacity:.35;}
+.cal-cell.has-log{background:var(--cream2);}
+.cal-cell .cal-num{font-size:12px;font-weight:500;color:var(--ink);line-height:1.3;}
+.cal-cell.today .cal-num{color:var(--sage-dk);font-weight:700;}
+.cal-cell .cal-dot{width:6px;height:6px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.cal-cell .cal-run{font-size:9px;color:var(--ink3);margin-top:2px;text-align:center;line-height:1.2;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cal-empty{aspect-ratio:1;min-height:44px;}
+
+/* ═══════════════════════════════════ RUN PLAN */
+.plan-phase{margin-bottom:22px;}
+.plan-phase-hdr{
+  border-radius:var(--r-lg);padding:14px 16px;margin-bottom:12px;border:1px solid;
+}
+.plan-phase-title{font-family:'Lora',serif;font-size:18px;font-weight:500;}
+.plan-phase-sub{font-size:12px;margin-top:3px;opacity:.8;}
+.plan-week{
+  background:var(--cream);border:1px solid var(--border);
+  border-radius:var(--r);margin-bottom:6px;overflow:hidden;
+}
+.plan-week-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;cursor:pointer;user-select:none;
+  border-bottom:1px solid transparent;transition:border-color .15s;
+}
+.plan-week-hdr.open{border-bottom-color:var(--border);}
+.plan-week-num{font-size:13px;font-weight:500;color:var(--ink);}
+.plan-week-dates{font-size:11px;color:var(--ink3);}
+.plan-week-chevron{font-size:12px;color:var(--ink3);transition:transform .2s;}
+.plan-week-hdr.open .plan-week-chevron{transform:rotate(180deg);}
+.plan-week-body{display:none;padding:0;}
+.plan-week-body.open{display:block;}
+.plan-day-row{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:9px 14px;border-bottom:1px solid var(--border);
+}
+.plan-day-row:last-child{border-bottom:none;}
+.plan-day-name{font-size:11px;font-weight:500;color:var(--ink3);width:28px;flex-shrink:0;padding-top:1px;}
+.plan-session-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.plan-session-info{flex:1;min-width:0;}
+.plan-session-type{font-size:13px;font-weight:500;color:var(--ink);}
+.plan-session-detail{font-size:12px;color:var(--ink3);margin-top:1px;line-height:1.5;}
+.plan-progress-bar{height:4px;background:var(--cream3);border-radius:2px;overflow:hidden;margin-top:6px;}
+.plan-progress-fill{height:100%;border-radius:2px;transition:width .4s;}
 </style>
 </head>
 <body>
@@ -408,6 +464,8 @@ textarea{resize:vertical;min-height:82px;line-height:1.6;}
   </div>
   <div class="tab-bar" id="tab-bar">
     <button class="tab-btn on" data-tab="planner">Today</button>
+    <button class="tab-btn" data-tab="calendar">Calendar</button>
+    <button class="tab-btn" data-tab="plan">Run Plan</button>
     <button class="tab-btn" data-tab="kitchen">Kitchen</button>
     <button class="tab-btn" data-tab="wisdom">Wisdom</button>
     <button class="tab-btn" data-tab="settings">Settings</button>
@@ -611,6 +669,36 @@ textarea{resize:vertical;min-height:82px;line-height:1.6;}
       <p>Your daily planner and wellness companion. Built around your Great North Run 2026 training programme — and designed to keep going long after race day.</p>
       <div class="text-sm text-muted mt8">Programme: 4 May – 13 Sep 2026 · 20 weeks</div>
     </div>
+  </div>
+
+  <!-- ─────────────────────────────── CALENDAR TAB -->
+  <div id="tab-calendar" class="hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <button class="btn btn-ghost btn-sm" id="cal-prev">←</button>
+      <div id="cal-month-label" style="font-family:'Lora',serif;font-size:17px;font-weight:500;"></div>
+      <button class="btn btn-ghost btn-sm" id="cal-next">→</button>
+    </div>
+    <!-- Day-of-week headers -->
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;">
+      <div style="text-align:center;font-size:10px;font-weight:500;color:var(--ink3);padding:4px 0;">M</div>
+      <div style="text-align:center;font-size:10px;font-weight:500;color:var(--ink3);padding:4px 0;">T</div>
+      <div style="text-align:center;font-size:10px;font-weight:500;color:var(--ink3);padding:4px 0;">W</div>
+      <div style="text-align:center;font-size:10px;font-weight:500;color:var(--ink3);padding:4px 0;">T</div>
+      <div style="text-align:center;font-size:10px;font-weight:500;color:var(--ink3);padding:4px 0;">F</div>
+      <div style="text-align:center;font-size:10px;font-weight:500;color:var(--ink3);padding:4px 0;">S</div>
+      <div style="text-align:center;font-size:10px;font-weight:500;color:var(--ink3);padding:4px 0;">S</div>
+    </div>
+    <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;"></div>
+    <!-- Legend -->
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
+      <div class="sec-label" style="margin-bottom:8px;">Legend</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;" id="cal-legend"></div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────── RUN PLAN TAB -->
+  <div id="tab-plan" class="hidden">
+    <div id="plan-content"></div>
   </div>
 
 </main>
@@ -1452,18 +1540,285 @@ function importData(file) {
   reader.readAsText(file);
 }
 
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CALENDAR VIEW
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Session type → colour dot mapping
+const SESSION_COLORS = {
+  'Rest Day':       '#C8C2BA',
+  'Easy Run':       '#6B9470',
+  'Cross Train':    '#6888A8',
+  'Long Run':       '#A88040',
+  'Recovery Walk':  '#9A928A',
+  'Race Pace Run':  '#A86858',
+  'Tempo Intervals':'#A86858',
+  'Speed Work':     '#986060',
+  'Race Sim':       '#986060',
+  'Short Tempo':    '#A86858',
+  'Shakeout':       '#8878B0',
+  '🏁 Race Day':    '#6B9470',
+};
+
+function sessionColor(type) {
+  return SESSION_COLORS[type] || '#9A928A';
+}
+
+let calViewDate = sod(new Date()); // tracks which month we're viewing
+
+function renderCalendar() {
+  const year  = calViewDate.getFullYear();
+  const month = calViewDate.getMonth();
+
+  el('cal-month-label').textContent = calViewDate.toLocaleDateString('en-GB', {month:'long', year:'numeric'});
+
+  // First day of month, adjusted Mon=0
+  const firstDay = new Date(year, month, 1);
+  const startDow = (firstDay.getDay() + 6) % 7; // Mon=0
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Previous month days to fill
+  const prevMonthDays = new Date(year, month, 0).getDate();
+
+  let cells = '';
+  let dayCount = 1;
+  let nextCount = 1;
+
+  // Total cells: enough rows to fit the month
+  const totalCells = Math.ceil((startDow + daysInMonth) / 7) * 7;
+
+  for (let i = 0; i < totalCells; i++) {
+    if (i < startDow) {
+      // Previous month
+      const d = prevMonthDays - startDow + i + 1;
+      cells += `<div class="cal-empty"></div>`;
+    } else if (dayCount <= daysInMonth) {
+      const cellDate = sod(new Date(year, month, dayCount));
+      const isToday   = sameDay(cellDate, sod(new Date()));
+      const isSelected = sameDay(cellDate, currentDate);
+      const inProg    = isInProg(cellDate);
+
+      // Check if there's a log entry
+      const log = loadDay(cellDate);
+      const hasLog = log && (log.notes || Object.values(log.habits||{}).some(Boolean) || (log.todos||[]).some(t=>t));
+
+      // Get run type for dot
+      const wk = weekNum(cellDate);
+      const di = dow(cellDate);
+      const run = inProg ? getRunForDay(wk, di, cellDate) : null;
+      const dotColor = run ? sessionColor(run.type) : 'transparent';
+      const runLabel = run ? run.type.replace('🏁 ','') : '';
+
+      const classes = [
+        'cal-cell',
+        isToday ? 'today' : '',
+        isSelected ? 'selected' : '',
+        hasLog ? 'has-log' : '',
+        !inProg && !isToday ? 'other-month' : '',
+      ].filter(Boolean).join(' ');
+
+      cells += `<div class="${classes}" data-cal-date="${dateStr(cellDate)}">
+        <div class="cal-num">${dayCount}</div>
+        ${run ? `<div class="cal-dot" style="background:${dotColor};"></div>` : ''}
+        ${run ? `<div class="cal-run">${esc(runLabel)}</div>` : ''}
+      </div>`;
+      dayCount++;
+    } else {
+      cells += `<div class="cal-empty"></div>`;
+    }
+  }
+
+  el('cal-grid').innerHTML = cells;
+
+  // Click to navigate
+  el('cal-grid').querySelectorAll('[data-cal-date]').forEach(cell => {
+    cell.addEventListener('click', () => {
+      const d = new Date(cell.dataset.calDate + 'T00:00:00');
+      navigateTo(d);
+      switchTab('planner');
+    });
+  });
+
+  // Legend
+  const legendTypes = [...new Set(
+    Array.from({length: daysInMonth}, (_, i) => {
+      const d = sod(new Date(year, month, i + 1));
+      if (!isInProg(d)) return null;
+      return getRunForDay(weekNum(d), dow(d), d).type;
+    }).filter(Boolean)
+  )];
+
+  el('cal-legend').innerHTML = legendTypes.map(t =>
+    `<div style="display:flex;align-items:center;gap:5px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:${sessionColor(t)};flex-shrink:0;"></div>
+      <span style="font-size:11px;color:var(--ink2);">${t}</span>
+    </div>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RUN PLAN VIEW
+// ══════════════════════════════════════════════════════════════════════════════
+
+function renderRunPlan() {
+  const today = sod(new Date());
+  let html = '';
+
+  // Race countdown banner
+  const dr = daysToRace(today);
+  if (dr > 0) {
+    html += `<div class="callout lav" style="margin-bottom:20px;">
+      <div class="callout-lbl">Race Countdown</div>
+      <p style="font-size:14px;font-style:normal;"><strong>${dr} days</strong> until the Great North Run · 13 September 2026 · Target: 1:45:00 at 5:00/km</p>
+    </div>`;
+  } else {
+    html += `<div class="callout sage" style="margin-bottom:20px;">
+      <div class="callout-lbl">Programme Complete</div>
+      <p>You did it. Race day was 13 September 2026.</p>
+    </div>`;
+  }
+
+  // Phase progress
+  const currentWk = weekNum(today);
+  const currentPhase = getPhase(currentWk);
+  if (currentPhase) {
+    const phaseTotal = currentPhase.wks[1] - currentPhase.wks[0] + 1;
+    const phaseWk    = currentWk - currentPhase.wks[0] + 1;
+    const pct        = Math.round((phaseWk / phaseTotal) * 100);
+    html += `<div style="margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
+        <div style="font-size:12px;font-weight:500;color:var(--ink2);">Current phase: ${currentPhase.name}</div>
+        <div style="font-size:11px;color:var(--ink3);">Week ${phaseWk} of ${phaseTotal}</div>
+      </div>
+      <div class="plan-progress-bar">
+        <div class="plan-progress-fill" style="width:${pct}%;background:${currentPhase.accent};"></div>
+      </div>
+    </div>`;
+  }
+
+  // Per-phase breakdown
+  PHASES.forEach(phase => {
+    const isCurrentPhase = currentPhase && phase.name === currentPhase.name;
+    html += `<div class="plan-phase">
+      <div class="plan-phase-hdr" style="background:${phase.bg};border-color:${phase.border};">
+        <div class="plan-phase-title" style="color:${phase.accent};">${phase.name}</div>
+        <div class="plan-phase-sub" style="color:${phase.accent};">Weeks ${phase.wks[0]}–${phase.wks[1]}</div>
+        ${isCurrentPhase ? `<div style="display:inline-block;font-size:10px;font-weight:500;letter-spacing:.8px;padding:2px 8px;border-radius:20px;background:${phase.accent};color:#fff;margin-top:6px;">YOU ARE HERE</div>` : ''}
+      </div>`;
+
+    // Show one representative week's sessions for this phase
+    const repWeek = phase.wks[0]; // use first week of phase as representative
+    const DOW_LABELS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+
+    // Build a rep date for each day of this phase's first week
+    const phaseStartDate = sod(addDays(PROG_START, (repWeek - 1) * 7));
+
+    html += `<div class="plan-week">`;
+
+    // Weekly mileage note
+    const mileageMap = {
+      'Base Building': '12–16 miles/week',
+      'Aerobic Development': '18–22 miles/week',
+      'Race-Pace Training': '24–28 miles/week',
+      'Peak & Consolidation': '28–32 miles/week',
+      'Taper': '20 → 12 → Race',
+    };
+
+    html += `<div class="plan-week-hdr open" data-phase-hdr="${phase.name}">
+      <span class="plan-week-num">Weekly Schedule</span>
+      <span class="plan-week-dates">${mileageMap[phase.name] || ''}</span>
+      <span class="plan-week-chevron">▾</span>
+    </div>
+    <div class="plan-week-body open">`;
+
+    for (let di = 0; di < 7; di++) {
+      const repDate = addDays(phaseStartDate, di);
+      const run = getRunForDay(repWeek, di, repDate);
+      const dot = sessionColor(run.type);
+      html += `<div class="plan-day-row">
+        <div class="plan-day-name">${DOW_LABELS[di].slice(0,3)}</div>
+        <div class="plan-session-dot" style="background:${dot};"></div>
+        <div class="plan-session-info">
+          <div class="plan-session-type">${esc(run.type)}</div>
+          <div class="plan-session-detail">${esc(run.detail)}</div>
+        </div>
+      </div>`;
+    }
+
+    html += `</div></div>`; // close week body + week
+
+    // Per-week list (collapsed by default, expandable)
+    html += `<div style="margin-top:6px;">`;
+    for (let wk = phase.wks[0]; wk <= phase.wks[1]; wk++) {
+      const wkStart = sod(addDays(PROG_START, (wk - 1) * 7));
+      const wkEnd   = addDays(wkStart, 6);
+      const isPast  = wkEnd < today;
+      const isCurrent = wk === currentWk;
+      const wkLabel = `${fmtShort(wkStart)} – ${fmtShort(wkEnd)}`;
+
+      html += `<div class="plan-week" style="${isPast?'opacity:.5':''}">
+        <div class="plan-week-hdr ${isCurrent?'open':''}" data-wk-hdr="${wk}">
+          <span class="plan-week-num">Week ${wk}${isCurrent?' 👈':''}</span>
+          <span class="plan-week-dates">${wkLabel}</span>
+          <span class="plan-week-chevron">▾</span>
+        </div>
+        <div class="plan-week-body ${isCurrent?'open':''}">`;
+
+      for (let di = 0; di < 7; di++) {
+        const dayDate = addDays(wkStart, di);
+        const run = getRunForDay(wk, di, dayDate);
+        const dot = sessionColor(run.type);
+        const isRaceDay = sameDay(dayDate, RACE_DATE);
+        html += `<div class="plan-day-row" style="cursor:pointer;" data-nav-date="${dateStr(dayDate)}">
+          <div class="plan-day-name">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][di]}</div>
+          <div class="plan-session-dot" style="background:${dot};"></div>
+          <div class="plan-session-info">
+            <div class="plan-session-type">${esc(run.type)}${isRaceDay?' 🏁':''}</div>
+            <div class="plan-session-detail">${esc(run.detail)}</div>
+          </div>
+        </div>`;
+      }
+      html += `</div></div>`; // close week
+    }
+    html += `</div>`; // close per-week list
+    html += `</div>`; // close phase
+  });
+
+  el('plan-content').innerHTML = html;
+
+  // Toggle week/phase accordions
+  el('plan-content').querySelectorAll('[data-wk-hdr],[data-phase-hdr]').forEach(hdr => {
+    hdr.addEventListener('click', () => {
+      hdr.classList.toggle('open');
+      const body = hdr.nextElementSibling;
+      if (body) body.classList.toggle('open');
+    });
+  });
+
+  // Click a day row to navigate to it
+  el('plan-content').querySelectorAll('[data-nav-date]').forEach(row => {
+    row.addEventListener('click', () => {
+      navigateTo(new Date(row.dataset.navDate + 'T00:00:00'));
+      switchTab('planner');
+    });
+  });
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // TAB SWITCHING
 // ══════════════════════════════════════════════════════════════════════════════
 
 function switchTab(tab) {
   activeTab = tab;
-  ['planner','kitchen','wisdom','settings'].forEach(t=>{
+  ['planner','calendar','plan','kitchen','wisdom','settings'].forEach(t=>{
     el(`tab-${t}`).classList.toggle('hidden', t!==tab);
   });
   document.querySelectorAll('.tab-btn').forEach(b=>{
     b.classList.toggle('on', b.dataset.tab===tab);
   });
+  if (tab==='calendar') { calViewDate = sod(currentDate); renderCalendar(); }
+  if (tab==='plan')     renderRunPlan();
   if (tab==='kitchen')  renderKitchen();
   if (tab==='wisdom')   renderWisdom();
   if (tab==='settings') renderSettings();
@@ -1485,6 +1840,16 @@ function renderAll() {
 // Tab buttons
 document.querySelectorAll('.tab-btn').forEach(b=>{
   b.addEventListener('click',()=>switchTab(b.dataset.tab));
+});
+
+// Calendar month nav
+el('cal-prev').addEventListener('click',()=>{
+  calViewDate = sod(new Date(calViewDate.getFullYear(), calViewDate.getMonth()-1, 1));
+  renderCalendar();
+});
+el('cal-next').addEventListener('click',()=>{
+  calViewDate = sod(new Date(calViewDate.getFullYear(), calViewDate.getMonth()+1, 1));
+  renderCalendar();
 });
 
 // Day nav
