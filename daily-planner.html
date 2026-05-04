@@ -1,0 +1,1872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Daily Planner">
+<title>Daily Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream:#FDFCF9;--cream2:#F7F5F0;--cream3:#EDEAE3;--cream4:#E5E1D8;
+  --ink:#2A2620;--ink2:#5A5450;--ink3:#9A928A;--ink4:#C2BAB2;
+  --border:#E2DDD6;--border2:#C8C2BA;
+  --sage:#6B9470;--sage-lt:#EEF4EF;--sage-mid:#BDD4BE;--sage-dk:#4A7050;
+  --blue:#6888A8;--blue-lt:#EAF0F7;--blue-mid:#B8CCDF;
+  --lav:#8878B0;--lav-lt:#EDE8F5;--lav-mid:#C4B8DC;--lav-dk:#6458A0;
+  --terra:#A86858;--terra-lt:#F4EDE9;--terra-mid:#D4B0A4;
+  --amber:#A88040;--amber-lt:#F8F0DC;--amber-mid:#DCC078;--amber-dk:#806020;
+  --red:#986060;--red-lt:#F4EDED;--red-mid:#CCAAAA;
+  --r:10px;--r-lg:14px;--r-xl:18px;
+  --sh:0 2px 16px rgba(42,38,32,.08);
+  --sh-lg:0 8px 40px rgba(42,38,32,.15);
+  --safe-t:env(safe-area-inset-top,0px);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-l:env(safe-area-inset-left,0px);
+  --safe-r:env(safe-area-inset-right,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{height:100%;-webkit-text-size-adjust:100%;}
+body{
+  font-family:'DM Sans',sans-serif;background:var(--cream2);color:var(--ink);
+  min-height:100%;padding-top:var(--safe-t);
+  overscroll-behavior-y:none;
+}
+input,textarea,select,button{font-family:'DM Sans',sans-serif;}
+
+/* ═══════════════════════════════════ HEADER */
+#header{
+  position:sticky;top:0;z-index:300;
+  background:var(--cream);border-bottom:1px solid var(--border);
+}
+.hdr-main{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px 10px;
+}
+.hdr-left{}
+.hdr-date{font-family:'Lora',serif;font-size:19px;font-weight:500;line-height:1.2;}
+.hdr-sub{font-size:11px;color:var(--ink3);margin-top:1px;letter-spacing:.2px;}
+.hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.habit-row{display:flex;align-items:center;gap:6px;}
+.habit-lbl{font-size:11px;color:var(--ink3);}
+.habit-bar{width:50px;height:3px;background:var(--cream3);border-radius:2px;overflow:hidden;}
+.habit-fill{height:100%;background:var(--sage);border-radius:2px;transition:width .4s;}
+.phase-tag{
+  font-size:10px;font-weight:500;letter-spacing:.8px;
+  padding:2px 8px;border-radius:20px;
+  background:var(--sage-lt);color:var(--sage);border:1px solid var(--sage-mid);
+}
+
+/* ═══════════════════════════════════ TABS */
+.tab-bar{
+  display:flex;border-top:1px solid var(--border);
+  padding:0 4px;
+}
+.tab-btn{
+  flex:1;padding:9px 4px 8px;font-size:12px;font-weight:400;
+  color:var(--ink3);background:none;border:none;
+  border-bottom:2px solid transparent;cursor:pointer;
+  transition:all .15s;letter-spacing:.2px;
+  margin-bottom:-1px;
+}
+.tab-btn.on{color:var(--ink);border-bottom-color:var(--sage);font-weight:500;}
+
+/* ═══════════════════════════════════ MAIN */
+main{
+  max-width:600px;margin:0 auto;
+  padding:18px 16px calc(var(--safe-b) + 80px);
+}
+
+/* ═══════════════════════════════════ SECTION */
+.sec{margin-bottom:22px;}
+.sec-label{
+  font-size:10px;font-weight:500;letter-spacing:1.5px;
+  color:var(--ink3);text-transform:uppercase;margin-bottom:10px;
+}
+.divider{height:1px;background:var(--border);margin:20px 0;}
+
+/* ═══════════════════════════════════ WEEK STRIP */
+.week-strip{
+  display:flex;gap:3px;margin-bottom:18px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+  padding-bottom:2px;scrollbar-width:none;
+}
+.week-strip::-webkit-scrollbar{display:none;}
+.day-cell{
+  flex:1;min-width:38px;text-align:center;
+  padding:7px 3px 5px;border-radius:var(--r);
+  border:1px solid var(--border);background:var(--cream);
+  cursor:pointer;transition:all .15s;
+}
+.day-cell.on{background:var(--sage-lt);border-color:var(--sage);}
+.day-cell .dc-n{font-size:9px;font-weight:500;color:var(--ink3);letter-spacing:.5px;}
+.day-cell .dc-d{font-size:15px;font-weight:500;color:var(--ink);line-height:1.3;}
+.day-cell.on .dc-n{color:var(--sage);}
+.day-cell.on .dc-d{color:var(--sage-dk);}
+.day-cell .dc-dot{width:4px;height:4px;border-radius:50%;background:var(--sage);margin:3px auto 0;}
+
+/* ═══════════════════════════════════ CALLOUT */
+.callout{border-radius:var(--r-lg);padding:14px 16px;margin-bottom:8px;border:1px solid;}
+.callout-lbl{font-size:10px;font-weight:500;letter-spacing:1.2px;margin-bottom:7px;}
+.callout.lav{background:var(--lav-lt);border-color:var(--lav-mid);}
+.callout.lav .callout-lbl{color:var(--lav);}
+.callout.lav p{font-family:'Lora',serif;font-style:italic;font-size:13px;line-height:1.85;color:var(--ink);}
+.callout.sage{background:var(--sage-lt);border-color:var(--sage-mid);}
+.callout.sage .callout-lbl{color:var(--sage);}
+.callout.sage p{font-size:13px;line-height:1.75;color:var(--ink2);font-style:italic;}
+.callout.amber{background:var(--amber-lt);border-color:var(--amber-mid);}
+.callout.amber .callout-lbl{color:var(--amber-dk);}
+.callout.amber p{font-size:13px;color:var(--ink2);}
+
+/* ═══════════════════════════════════ RUN BLOCK */
+.run-block{border-radius:var(--r-lg);padding:15px 16px;margin-bottom:4px;border:1px solid;}
+.run-phase{font-size:10px;font-weight:500;letter-spacing:1px;margin-bottom:4px;}
+.run-type{font-family:'Lora',serif;font-size:20px;font-weight:500;}
+.run-detail{font-size:13px;color:var(--ink2);margin-top:4px;line-height:1.6;}
+.run-foot{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,.07);}
+.run-foot span{font-size:11px;color:var(--ink3);}
+
+/* ═══════════════════════════════════ CHECK ROWS */
+.check-row{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;border-radius:var(--r);
+  background:var(--cream);border:1px solid var(--border);
+  cursor:pointer;user-select:none;transition:all .15s;
+  margin-bottom:6px;min-height:44px;
+}
+.check-row.on{background:var(--sage-lt);border-color:var(--sage-mid);}
+.cbox{
+  width:18px;height:18px;border-radius:5px;flex-shrink:0;
+  border:1.5px solid var(--border2);background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#fff;transition:all .15s;
+}
+.check-row.on .cbox{background:var(--sage);border-color:var(--sage);}
+.check-lbl{font-size:14px;color:var(--ink);transition:color .15s;}
+.check-row.on .check-lbl{color:var(--ink3);text-decoration:line-through;}
+
+/* ═══════════════════════════════════ INPUT ROWS */
+.input-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.nbadge{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:500;
+}
+.nbadge.sage{background:var(--sage-lt);border:1px solid var(--sage-mid);color:var(--sage);}
+.nbadge.blue{background:var(--blue-lt);border:1px solid var(--blue-mid);color:var(--blue);}
+.nbadge.lav{background:var(--lav-lt);border:1px solid var(--lav-mid);color:var(--lav);}
+input[type=text],textarea,select{
+  width:100%;padding:10px 13px;
+  border:1px solid var(--border);border-radius:var(--r);
+  background:var(--cream);color:var(--ink);font-size:15px;
+  outline:none;transition:border-color .15s;
+  -webkit-appearance:none;appearance:none;
+}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--sage);}
+input.struck{color:var(--ink3);text-decoration:line-through;}
+textarea{resize:vertical;min-height:82px;line-height:1.6;}
+
+/* ═══════════════════════════════════ TODO ROW */
+.todo-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.tcheck{
+  width:18px;height:18px;border-radius:5px;flex-shrink:0;
+  border:1.5px solid var(--border2);background:var(--cream);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#fff;cursor:pointer;transition:all .15s;
+  flex-shrink:0;
+}
+.tcheck.on{background:var(--sage);border-color:var(--sage);}
+
+/* ═══════════════════════════════════ BUTTONS */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:11px 18px;border-radius:var(--r);
+  font-size:14px;font-weight:500;cursor:pointer;
+  border:1px solid;transition:all .15s;min-height:44px;
+}
+.btn-primary{background:var(--sage);color:#fff;border-color:var(--sage);}
+.btn-primary:active{background:var(--sage-dk);}
+.btn-ghost{background:transparent;color:var(--ink2);border-color:var(--border2);}
+.btn-ghost:active{background:var(--cream3);}
+.btn-danger{background:transparent;color:var(--red);border-color:var(--red-mid);}
+.btn-danger:active{background:var(--red-lt);}
+.btn-sm{padding:7px 13px;font-size:13px;min-height:36px;}
+.btn-full{width:100%;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* ═══════════════════════════════════ CARDS */
+.card{
+  background:var(--cream);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:14px 16px;
+  transition:border-color .15s;
+}
+.card:active{border-color:var(--border2);}
+.card-row{display:flex;align-items:flex-start;gap:12px;}
+.card-emoji{font-size:22px;line-height:1;padding-top:1px;flex-shrink:0;}
+.card-body{flex:1;min-width:0;}
+.card-title{font-size:14px;font-weight:500;color:var(--ink);}
+.card-sub{font-size:12px;color:var(--ink3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-arrow{font-size:14px;color:var(--ink4);flex-shrink:0;padding-top:2px;}
+.card-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.tag{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:400;}
+.tag.sage{background:var(--sage-lt);color:var(--sage);border:1px solid var(--sage-mid);}
+.tag.blue{background:var(--blue-lt);color:var(--blue);border:1px solid var(--blue-mid);}
+.tag.lav{background:var(--lav-lt);color:var(--lav);border:1px solid var(--lav-mid);}
+.tag.amber{background:var(--amber-lt);color:var(--amber-dk);border:1px solid var(--amber-mid);}
+.tag.terra{background:var(--terra-lt);color:var(--terra);border:1px solid var(--terra-mid);}
+.card-list{display:flex;flex-direction:column;gap:8px;}
+
+/* ═══════════════════════════════════ MODAL */
+.modal-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(42,38,32,.5);
+  display:flex;align-items:flex-end;
+  padding-bottom:var(--safe-b);
+}
+.modal{
+  background:var(--cream);border-radius:var(--r-xl) var(--r-xl) 0 0;
+  width:100%;max-height:92vh;overflow-y:auto;
+  padding:20px 18px calc(var(--safe-b)+20px);
+  -webkit-overflow-scrolling:touch;
+}
+.modal-handle{
+  width:36px;height:4px;border-radius:2px;
+  background:var(--cream4);margin:0 auto 18px;
+}
+.modal-title{font-family:'Lora',serif;font-size:19px;font-weight:500;margin-bottom:18px;}
+.modal-close{
+  position:absolute;top:18px;right:18px;
+  background:var(--cream3);border:none;border-radius:50%;
+  width:30px;height:30px;font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--ink2);
+}
+.modal-header{position:relative;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;font-weight:500;color:var(--ink2);margin-bottom:5px;display:block;}
+.form-hint{font-size:11px;color:var(--ink3);margin-top:4px;}
+.tag-picker{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.tag-opt{
+  padding:5px 12px;border-radius:20px;font-size:13px;
+  border:1px solid var(--border2);background:var(--cream);
+  color:var(--ink2);cursor:pointer;transition:all .15s;
+}
+.tag-opt.on{background:var(--sage-lt);border-color:var(--sage);color:var(--sage);}
+
+/* ═══════════════════════════════════ SEARCH */
+.search-wrap{position:relative;margin-bottom:14px;}
+.search-wrap input{padding-left:36px;}
+.search-icon{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  font-size:15px;color:var(--ink3);pointer-events:none;
+}
+
+/* ═══════════════════════════════════ FILTER PILLS */
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none;}
+.filter-row::-webkit-scrollbar{display:none;}
+.filter-pill{
+  flex-shrink:0;padding:6px 12px;border-radius:20px;font-size:12px;
+  border:1px solid var(--border);background:var(--cream);color:var(--ink2);
+  cursor:pointer;transition:all .15s;white-space:nowrap;
+}
+.filter-pill.on{background:var(--sage-lt);border-color:var(--sage);color:var(--sage);font-weight:500;}
+
+/* ═══════════════════════════════════ RECIPE DETAIL */
+.recipe-detail{padding-bottom:20px;}
+.recipe-hero{font-size:44px;text-align:center;margin-bottom:12px;}
+.recipe-meta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.method-step{display:flex;gap:10px;margin-bottom:10px;}
+.step-num{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  background:var(--sage-lt);border:1px solid var(--sage-mid);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:500;color:var(--sage);margin-top:1px;
+}
+.step-text{font-size:14px;line-height:1.6;color:var(--ink);}
+.ing-item{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.ing-item:last-child{border-bottom:none;}
+.ing-dash{color:var(--ink4);flex-shrink:0;padding-top:1px;}
+
+/* ═══════════════════════════════════ QUOTE CARD */
+.quote-card{
+  background:var(--cream);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:16px;margin-bottom:10px;
+}
+.quote-text{
+  font-family:'Lora',serif;font-style:italic;
+  font-size:14px;line-height:1.8;color:var(--ink);margin-bottom:8px;
+}
+.quote-foot{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.quote-actions{display:flex;gap:6px;}
+.icon-btn{
+  background:none;border:1px solid var(--border);border-radius:8px;
+  padding:5px 10px;font-size:12px;cursor:pointer;color:var(--ink2);
+  transition:all .15s;min-height:32px;
+}
+.icon-btn:active{background:var(--cream3);}
+.icon-btn.danger{color:var(--red);border-color:var(--red-mid);}
+
+/* ═══════════════════════════════════ NAV BAR (bottom) */
+.nav-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  background:var(--cream);border-top:1px solid var(--border);
+  display:flex;
+  padding-bottom:var(--safe-b);
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:8px 4px;
+  cursor:pointer;transition:all .15s;border:none;background:none;
+}
+.nav-icon{font-size:20px;line-height:1;}
+.nav-lbl{font-size:10px;margin-top:2px;color:var(--ink3);font-weight:400;}
+.nav-item.on .nav-lbl{color:var(--sage);font-weight:500;}
+
+/* ═══════════════════════════════════ EMPTY STATE */
+.empty{
+  text-align:center;padding:40px 20px;
+  color:var(--ink3);font-size:14px;
+}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+
+/* ═══════════════════════════════════ EXPORT SECTION */
+.export-card{
+  background:var(--cream);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:18px;margin-bottom:12px;
+}
+.export-card h3{font-family:'Lora',serif;font-size:16px;font-weight:500;margin-bottom:6px;}
+.export-card p{font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:14px;}
+.data-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.stat-pill{
+  font-size:12px;padding:4px 10px;border-radius:20px;
+  background:var(--cream2);border:1px solid var(--border);color:var(--ink2);
+}
+
+/* ═══════════════════════════════════ SYNC STATUS */
+.sync-bar{
+  display:flex;align-items:center;gap:7px;
+  padding:7px 18px;border-top:1px solid var(--border);
+  background:var(--cream);font-size:11px;color:var(--ink3);
+}
+.sync-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--ink4);flex-shrink:0;transition:background .3s;
+}
+.sync-dot.ok{background:var(--sage);}
+.sync-dot.busy{background:var(--amber);animation:sdpulse 1s infinite;}
+.sync-dot.err{background:var(--red);}
+@keyframes sdpulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+.sync-label{flex:1;}
+.sync-now-btn{
+  background:none;border:1px solid var(--border);border-radius:6px;
+  padding:3px 9px;font-size:11px;cursor:pointer;color:var(--ink2);
+  font-family:'DM Sans',sans-serif;transition:all .15s;
+}
+.sync-now-btn:active{background:var(--cream3);}
+
+/* ═══════════════════════════════════ UTILS */
+.hidden{display:none!important;}
+.lora{font-family:'Lora',serif;}
+.italic{font-style:italic;}
+.mt8{margin-top:8px;}
+.mt12{margin-top:12px;}
+.gap8{gap:8px;}
+.flex{display:flex;}
+.flex-col{flex-direction:column;}
+.items-center{align-items:center;}
+.justify-between{justify-content:space-between;}
+.text-muted{color:var(--ink3);}
+.text-sm{font-size:12px;}
+.fw500{font-weight:500;}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+<!-- ══════════════════════════════════════════════════════ HEADER -->
+<div id="header">
+  <div class="hdr-main">
+    <div class="hdr-left">
+      <div class="hdr-date lora" id="hdr-date">Monday 4 May</div>
+      <div class="hdr-sub" id="hdr-sub">Week 1 of 20 · Base Building</div>
+    </div>
+    <div class="hdr-right">
+      <div class="habit-row">
+        <span class="habit-lbl" id="habit-count">0/5</span>
+        <div class="habit-bar"><div class="habit-fill" id="habit-fill" style="width:0%"></div></div>
+      </div>
+      <div class="phase-tag" id="phase-tag">Base Building</div>
+    </div>
+  </div>
+  <div id="sync-bar" class="sync-bar hidden">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span class="sync-label" id="sync-label">Not connected to Google Drive</span>
+    <button class="sync-now-btn" id="sync-now-btn">Sync now</button>
+  </div>
+  <div class="tab-bar" id="tab-bar">
+    <button class="tab-btn on" data-tab="planner">Today</button>
+    <button class="tab-btn" data-tab="kitchen">Kitchen</button>
+    <button class="tab-btn" data-tab="wisdom">Wisdom</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ MAIN -->
+<main id="main-content">
+
+  <!-- ─────────────────────────────── PLANNER TAB -->
+  <div id="tab-planner">
+
+    <!-- Week strip -->
+    <div class="week-strip" id="week-strip"></div>
+
+    <!-- Run block -->
+    <div class="sec">
+      <div id="run-block"></div>
+    </div>
+
+    <!-- Reminders -->
+    <div class="sec">
+      <div class="sec-label">Today's Reminders</div>
+      <div id="reminders-block"></div>
+    </div>
+
+    <!-- To-do -->
+    <div class="sec">
+      <div class="sec-label">Today's To-Do List</div>
+      <div id="todo-block">
+        <div id="todo-items"></div>
+      </div>
+    </div>
+
+    <!-- Habits -->
+    <div class="sec">
+      <div class="sec-label">Daily Habits</div>
+      <div id="habits-block"></div>
+    </div>
+
+    <!-- Contributions -->
+    <div class="sec">
+      <div class="sec-label">How I contributed to those around me today</div>
+      <div id="contrib-block">
+        <div class="input-row"><span class="nbadge blue">1</span><input type="text" placeholder="Contribution 1…" data-contrib="1"></div>
+        <div class="input-row"><span class="nbadge blue">2</span><input type="text" placeholder="Contribution 2…" data-contrib="2"></div>
+        <div class="input-row"><span class="nbadge blue">3</span><input type="text" placeholder="Contribution 3…" data-contrib="3"></div>
+      </div>
+    </div>
+
+    <!-- Best day -->
+    <div class="sec">
+      <div class="sec-label">Why today is the best day</div>
+      <div id="bestday-block">
+        <div class="input-row"><span class="nbadge sage">1</span><input type="text" placeholder="Reason 1…" data-bestday="1"></div>
+        <div class="input-row"><span class="nbadge sage">2</span><input type="text" placeholder="Reason 2…" data-bestday="2"></div>
+        <div class="input-row"><span class="nbadge sage">3</span><input type="text" placeholder="Reason 3…" data-bestday="3"></div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="sec">
+      <div class="sec-label">Notes</div>
+      <textarea id="notes-field" placeholder="Run notes, energy levels, how the day felt…"></textarea>
+    </div>
+
+    <!-- Day nav -->
+    <div class="flex justify-between items-center" style="padding-top:14px;border-top:1px solid var(--border);">
+      <button class="btn btn-ghost btn-sm" id="btn-prev">← Previous</button>
+      <button class="btn btn-ghost btn-sm" id="btn-today">Today</button>
+      <button class="btn btn-ghost btn-sm" id="btn-next">Next →</button>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────── KITCHEN TAB -->
+  <div id="tab-kitchen" class="hidden">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="recipe-search" placeholder="Search recipes…">
+    </div>
+    <div class="filter-row" id="recipe-filters"></div>
+    <div class="flex justify-between items-center" style="margin-bottom:14px;">
+      <div class="sec-label" style="margin:0;" id="recipe-count">0 recipes</div>
+      <button class="btn btn-primary btn-sm" id="btn-add-recipe">+ Add Recipe</button>
+    </div>
+    <div class="card-list" id="recipe-list"></div>
+  </div>
+
+  <!-- ─────────────────────────────── WISDOM TAB -->
+  <div id="tab-wisdom" class="hidden">
+    <div class="callout lav" style="margin-bottom:20px;">
+      <div class="callout-lbl">Daily Mantra</div>
+      <p>I trust that my life is unfolding how I need it to. I trust myself no matter what. My value is not up for debate, and I don't need to chase proof of my worth. Rejection is redirection. I have survived everything that has been thrown at me, and I can handle whatever comes my way.</p>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="wisdom-search" placeholder="Search reminders…">
+    </div>
+    <div class="filter-row" id="wisdom-filters"></div>
+    <div class="flex justify-between items-center" style="margin-bottom:14px;">
+      <div class="sec-label" style="margin:0;" id="wisdom-count">0 entries</div>
+      <button class="btn btn-primary btn-sm" id="btn-add-wisdom">+ Add</button>
+    </div>
+    <div id="wisdom-list"></div>
+  </div>
+
+  <!-- ─────────────────────────────── SETTINGS TAB -->
+  <div id="tab-settings" class="hidden">
+
+    <!-- Google Drive -->
+    <div class="export-card">
+      <h3>Google Drive Sync</h3>
+      <p>Connect your Google account to sync your data across all your devices. Your planner file is saved to your own Google Drive — nothing goes anywhere else.</p>
+      <div id="gdrive-connected-ui" class="hidden">
+        <div class="data-stats" style="margin-bottom:14px;">
+          <span class="stat-pill" id="gd-account-pill">Connected</span>
+          <span class="stat-pill" id="gd-sync-pill">Never synced</span>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btn-sync-now" style="flex:1;">⟳ Sync Now</button>
+          <button class="btn btn-ghost" id="btn-gdrive-disconnect">Disconnect</button>
+        </div>
+      </div>
+      <div id="gdrive-disconnected-ui">
+        <div id="gdrive-no-client" class="hidden">
+          <div class="callout amber" style="margin-bottom:12px;">
+            <div class="callout-lbl">Setup required</div>
+            <p>Paste your Google OAuth Client ID below to enable sync. See the setup guide at the bottom of this page.</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Google OAuth Client ID</label>
+            <input type="text" id="client-id-input" placeholder="123456789-abc….apps.googleusercontent.com">
+          </div>
+          <button class="btn btn-primary btn-full" id="btn-save-client-id">Save & Connect</button>
+        </div>
+        <div id="gdrive-has-client">
+          <button class="btn btn-primary btn-full" id="btn-gdrive-connect">Connect Google Drive</button>
+          <p style="font-size:11px;color:var(--ink3);margin-top:8px;text-align:center;">You'll be asked to sign in and grant access to your Drive</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export / Import -->
+    <div class="export-card">
+      <h3>Local Backup</h3>
+      <p>Download a JSON backup of everything — daily logs, recipes, and wisdom entries. Keep a copy in iCloud Drive or Google Drive as a safety net.</p>
+      <div class="data-stats" id="data-stats"></div>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="btn-export" style="flex:1;">⬇ Export Backup</button>
+        <button class="btn btn-ghost" id="btn-import-trigger">⬆ Import</button>
+      </div>
+      <input type="file" id="import-file" accept=".json" class="hidden">
+    </div>
+
+    <!-- Setup guide -->
+    <div class="export-card" id="gdrive-setup-guide">
+      <h3>Google Drive Setup Guide</h3>
+      <p>Follow these steps once to get your Client ID. Takes about 10 minutes.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        <div class="method-step">
+          <span class="step-num">1</span>
+          <span class="step-text">Go to <strong>console.cloud.google.com</strong> and sign in with your Google account.</span>
+        </div>
+        <div class="method-step">
+          <span class="step-num">2</span>
+          <span class="step-text">Click <strong>Select a project</strong> at the top, then <strong>New Project</strong>. Name it anything — e.g. "Daily Planner". Click <strong>Create</strong>.</span>
+        </div>
+        <div class="method-step">
+          <span class="step-num">3</span>
+          <span class="step-text">In the left menu go to <strong>APIs &amp; Services → Library</strong>. Search for <strong>Google Drive API</strong> and click <strong>Enable</strong>.</span>
+        </div>
+        <div class="method-step">
+          <span class="step-num">4</span>
+          <span class="step-text">Go to <strong>APIs &amp; Services → OAuth consent screen</strong>. Choose <strong>External</strong>, click Create. Fill in App name (e.g. "Daily Planner") and your email for support and developer contact. Click <strong>Save and Continue</strong> through all steps.</span>
+        </div>
+        <div class="method-step">
+          <span class="step-num">5</span>
+          <span class="step-text">Go to <strong>APIs &amp; Services → Credentials</strong>. Click <strong>+ Create Credentials → OAuth client ID</strong>.</span>
+        </div>
+        <div class="method-step">
+          <span class="step-num">6</span>
+          <span class="step-text">Set Application type to <strong>Web application</strong>. Under <strong>Authorised JavaScript origins</strong> click Add URI and enter the address you open this file from. If opening as a local file use <strong>null</strong>. Click <strong>Create</strong>.</span>
+        </div>
+        <div class="method-step">
+          <span class="step-num">7</span>
+          <span class="step-text">Copy the <strong>Client ID</strong> shown (ends in .apps.googleusercontent.com). Paste it into the field above and tap <strong>Save &amp; Connect</strong>.</span>
+        </div>
+        <div class="method-step">
+          <span class="step-num">8</span>
+          <span class="step-text">The first time you connect, Google will show a warning: "Google hasn't verified this app." Click <strong>Advanced</strong> then <strong>Go to Daily Planner (unsafe)</strong>. This is your own app — it is safe.</span>
+        </div>
+      </div>
+      <div class="callout sage">
+        <div class="callout-lbl">How sync works</div>
+        <p>Your data is saved as a single file called <strong>daily-planner-data.json</strong> in your Google Drive. The app reads from and writes to that file. You can see it in Drive at any time. Sync happens automatically when you make changes, and when you open the app.</p>
+      </div>
+    </div>
+
+    <div class="export-card">
+      <h3>About</h3>
+      <p>Your daily planner and wellness companion. Built around your Great North Run 2026 training programme — and designed to keep going long after race day.</p>
+      <div class="text-sm text-muted mt8">Programme: 4 May – 13 Sep 2026 · 20 weeks</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════ MODALS -->
+
+<!-- Recipe view/edit modal -->
+<div class="modal-overlay hidden" id="recipe-modal">
+  <div class="modal" id="recipe-modal-body"></div>
+</div>
+
+<!-- Recipe add/edit form modal -->
+<div class="modal-overlay hidden" id="recipe-form-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title lora" id="recipe-form-title">New Recipe</div>
+      <button class="modal-close" id="recipe-form-close">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input type="text" id="rf-name" placeholder="Recipe name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      <input type="text" id="rf-emoji" placeholder="🍽️" style="max-width:80px;">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Prep time</label>
+      <input type="text" id="rf-time" placeholder="e.g. 20 min">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Serves</label>
+      <input type="text" id="rf-serves" placeholder="1">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tags</label>
+      <div class="tag-picker" id="recipe-tag-picker"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Ingredients</label>
+      <textarea id="rf-ingredients" placeholder="One ingredient per line&#10;e.g. 1 chicken breast&#10;80g quinoa" style="min-height:100px;"></textarea>
+      <div class="form-hint">One per line</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Method</label>
+      <textarea id="rf-steps" placeholder="One step per line&#10;e.g. Cook quinoa in water…" style="min-height:100px;"></textarea>
+      <div class="form-hint">One step per line</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tip (optional)</label>
+      <input type="text" id="rf-tip" placeholder="e.g. Great for batch cooking">
+    </div>
+    <div class="btn-row mt12">
+      <button class="btn btn-primary" id="rf-save" style="flex:1;">Save Recipe</button>
+      <button class="btn btn-ghost" id="rf-cancel">Cancel</button>
+    </div>
+    <div class="mt8" id="rf-delete-wrap"></div>
+  </div>
+</div>
+
+<!-- Wisdom add/edit form modal -->
+<div class="modal-overlay hidden" id="wisdom-form-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title lora" id="wisdom-form-title">New Entry</div>
+      <button class="modal-close" id="wisdom-form-close">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Quote / Affirmation / Reminder</label>
+      <textarea id="wf-text" placeholder="Write anything that inspires you…" style="min-height:100px;"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Source (optional)</label>
+      <input type="text" id="wf-source" placeholder="e.g. The Courage to Be Disliked">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <div class="tag-picker" id="wisdom-tag-picker"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Include in daily rotation?</label>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+        <input type="checkbox" id="wf-rotation" style="width:18px;height:18px;accent-color:var(--sage);cursor:pointer;" checked>
+        <label for="wf-rotation" style="font-size:14px;cursor:pointer;">Yes — show this in my daily reminders</label>
+      </div>
+    </div>
+    <div class="btn-row mt12">
+      <button class="btn btn-primary" id="wf-save" style="flex:1;">Save Entry</button>
+      <button class="btn btn-ghost" id="wf-cancel">Cancel</button>
+    </div>
+    <div class="mt8" id="wf-delete-wrap"></div>
+  </div>
+</div>
+
+</div><!-- #app -->
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+// DATA & CONSTANTS
+// ══════════════════════════════════════════════════════════════════════════════
+
+const PROG_START = new Date('2026-05-04T00:00:00');
+const RACE_DATE  = new Date('2026-09-13T00:00:00');
+const TOTAL_WKS  = 20;
+const MANTRA     = "I trust that my life is unfolding how I need it to. I trust myself no matter what. My value is not up for debate, and I don't need to chase proof of my worth. Rejection is redirection. I have survived everything that has been thrown at me, and I can handle whatever comes my way.";
+
+const PHASES = [
+  {wks:[1,4],  name:'Base Building',       bg:'var(--sage-lt)', border:'var(--sage-mid)', accent:'var(--sage)',  tag:'sage'},
+  {wks:[5,8],  name:'Aerobic Development', bg:'var(--blue-lt)', border:'var(--blue-mid)', accent:'var(--blue)',  tag:'blue'},
+  {wks:[9,13], name:'Race-Pace Training',  bg:'var(--terra-lt)',border:'var(--terra-mid)',accent:'var(--terra)', tag:'terra'},
+  {wks:[14,17],name:'Peak & Consolidation',bg:'var(--red-lt)',  border:'var(--red-mid)',  accent:'var(--red)',   tag:'red'},
+  {wks:[18,20],name:'Taper',               bg:'var(--lav-lt)',  border:'var(--lav-mid)',  accent:'var(--lav)',   tag:'lav'},
+];
+
+const CROSS_OPTS = [
+  '30–40 min bodyweight circuit: squats, lunges, glute bridges, press-ups, plank',
+  '30 min yoga for runners — search YouTube, no equipment needed',
+  '30–40 min Pilates at home — brilliant for core and injury prevention',
+  '30 min dance workout at home — genuinely great cardio',
+  '30–40 min home HIIT session — no gym needed',
+  '30 min brisk walk or hill walk — easy on the joints',
+  '30 min aerobics video at home — no equipment needed',
+];
+
+const RUN_SCHEDULE = {
+  0:{type:'Rest Day',detail:'Active recovery — gentle walk or yoga'},
+  1:{type:'Easy Run',detail:'25–35 min at conversational pace. You should be able to hold a full sentence throughout.'},
+  2:{type:'Cross Train',detail:''},
+  3:{type:'Easy Run',detail:'25–35 min at conversational pace'},
+  4:{type:'Rest Day',detail:'Full rest or light stretching only'},
+  5:{type:'Long Run',detail:'Easy effort throughout — build by 5–10 min each week'},
+  6:{type:'Recovery Walk',detail:'20–30 min easy walk. Keep it gentle.'},
+};
+
+const PHASE3_RUNS = {
+  1:{type:'Race Pace Run',detail:'Warm-up + 3–4 miles at 5:00/km + cool-down'},
+  3:{type:'Tempo Intervals',detail:'4 × 1 mile at race pace, 2 min recovery jog between each'},
+  5:{type:'Long Run',detail:'90–100 min easy, last 15 min at race pace (5:00/km)'},
+};
+const PHASE4_RUNS = {
+  1:{type:'Speed Work',detail:'Warm-up + 8 × 600m fast + cool-down'},
+  3:{type:'Race Sim',detail:'10K at goal race pace (5:00/km)'},
+  5:{type:'Long Run',detail:'100–110 min, middle 40 min at race pace'},
+};
+const PHASE5_RUNS = {
+  1:{type:'Easy Run',detail:'30 min easy with 4 × 30s strides'},
+  2:{type:'Short Tempo',detail:'20 min easy + 10 min race pace + 10 min easy'},
+  3:{type:'Easy Run',detail:'25 min easy'},
+  5:{type:'Shakeout',detail:'10–15 min very easy — keep it light'},
+};
+
+const HABITS = [
+  {id:'vitamins', label:'💊 Vitamins'},
+  {id:'stretch',  label:'🧘 Yoga / Stretch'},
+  {id:'meditate', label:'🧠 Meditation'},
+  {id:'journal',  label:'📓 Journaling'},
+  {id:'reading',  label:'📖 Reading (30 min)'},
+];
+
+const RECIPE_TAGS = ['breakfast','lunch','dinner','snack','post-run','batch-friendly','no-cook','quick'];
+const WISDOM_TAGS = ['mindset','running','letting go','self-worth','healing','gratitude','courage','daily'];
+
+const DEFAULT_RECIPES = [
+  {id:'r1',name:'Greek Yoghurt Bowl',emoji:'🫙',time:'2 min',serves:1,tags:['breakfast','no-cook'],
+   ingredients:['150g Greek yoghurt (full fat)','1 banana, sliced','40g granola','Drizzle of honey (optional)'],
+   steps:['Spoon yoghurt into a bowl.','Slice banana and arrange on top.','Scatter granola over.','Drizzle with honey if using.'],
+   tip:'Eat 60 min before long runs. Easy to digest and gives you steady energy.'},
+  {id:'r2',name:'Chicken Quinoa Bowl',emoji:'🥗',time:'20 min',serves:1,tags:['lunch','batch-friendly'],
+   ingredients:['1 chicken breast','80g quinoa (dry)','2 tbsp tahini','1 tbsp lemon juice','½ cucumber, diced','Handful baby spinach','Salt, pepper'],
+   steps:['Rinse quinoa. Simmer in 200ml water 12–15 min until absorbed. Fluff with fork.','Season chicken and pan-fry 5–6 min each side until cooked through. Slice.','Tahini sauce: mix tahini, lemon juice, 2 tbsp water, pinch of salt until smooth.','Assemble: quinoa base, spinach, cucumber, chicken. Drizzle sauce over.'],
+   tip:'Cook double quinoa and save half — it keeps 3 days in the fridge.'},
+  {id:'r3',name:'Tuna Quinoa Bowl',emoji:'🥗',time:'5 min',serves:1,tags:['lunch','no-cook','quick'],
+   ingredients:['1 tin tuna in spring water, drained','Leftover cooked quinoa (~200g cooked)','2 tbsp tahini','1 tbsp lemon juice','½ cucumber, diced','Handful baby spinach'],
+   steps:['Warm leftover quinoa briefly or eat cold.','Make tahini sauce: tahini, lemon juice, 2 tbsp water, salt.','Drain and flake tuna.','Build: quinoa, spinach, cucumber, tuna. Pour sauce over.'],
+   tip:'Zero effort when using leftover quinoa — 5 minutes from fridge to bowl.'},
+  {id:'r4',name:'Salmon + Sweet Potato',emoji:'🐟',time:'35 min',serves:1,tags:['dinner','batch-friendly'],
+   ingredients:['2 salmon fillets (cook both, eat one tonight)','1 medium sweet potato, cubed','150g tenderstem broccoli','1 tbsp olive oil','Salt, pepper, chilli flakes (optional)'],
+   steps:['Preheat oven to 200°C. Toss sweet potato with oil, salt, pepper. Roast 20–25 min.','Add both seasoned salmon fillets for the last 10–12 min.','Steam broccoli 4–5 min.','Serve one fillet. Wrap the second in foil, refrigerate — use within 24 hrs.'],
+   tip:'Cook both fillets at once. The second is tomorrow\'s dinner with zero effort.'},
+  {id:'r5',name:'Saved Salmon + Roasted Veg',emoji:'🐟',time:'20 min',serves:1,tags:['dinner','quick'],
+   ingredients:['Saved salmon fillet (from previous day)','1 courgette, sliced into half-moons','Handful cherry tomatoes','1 tbsp olive oil','Fresh basil (optional)'],
+   steps:['Preheat oven to 200°C. Toss courgette and tomatoes with oil, salt, pepper.','Roast 15 min until softened.','Add cold salmon fillet for last 8 min to warm through.','Scatter basil over if using.'],
+   tip:'Reheat salmon in the oven with the veg — never microwave it.'},
+  {id:'r6',name:'Chicken Stir Fry',emoji:'🍜',time:'25 min',serves:1,tags:['dinner','batch-friendly'],
+   ingredients:['2 chicken breasts (cook both)','80g brown rice (dry)','150g frozen edamame','2 tbsp soy sauce','1 tsp sesame oil','1 tsp fresh ginger, grated','1 garlic clove, minced'],
+   steps:['Cook brown rice per packet (about 25 min).','Cook edamame 3–4 min in boiling water.','Pan-fry both chicken breasts 5–6 min per side. Slice both — set one aside for tomorrow.','In same pan, fry ginger and garlic 30 sec. Add soy sauce and sesame oil.','Toss rice, edamame, and tonight\'s chicken in the sauce.'],
+   tip:'The saved chicken breast goes straight into tomorrow\'s lunch — no extra cooking.'},
+  {id:'r7',name:'Lentil & Sweet Potato Soup',emoji:'🍲',time:'30 min',serves:2,tags:['dinner','batch-friendly'],
+   ingredients:['150g red lentils','1 large sweet potato, peeled and cubed','700ml vegetable stock','1 onion, diced','2 garlic cloves, minced','1 tsp cumin','1 tsp paprika','1 tbsp olive oil','Seeded bread to serve'],
+   steps:['Fry onion in oil over medium heat 5 min. Add garlic, cumin, paprika — cook 1 min.','Add lentils, sweet potato, and stock. Bring to a boil.','Reduce heat and simmer 20 min until everything is soft.','Blend until smooth with a hand blender. Season to taste.','Serve with seeded bread.'],
+   tip:'Makes 2 portions. Refrigerate the second immediately — tomorrow\'s dinner is done.'},
+  {id:'r8',name:'Beef Pasta Bolognese',emoji:'🍝',time:'30 min',serves:1,tags:['dinner'],
+   ingredients:['100g wholegrain pasta (dry)','150g lean beef mince','1 tin chopped tomatoes','1 onion, diced','1 garlic clove','Large handful baby spinach','1 tbsp olive oil','1 tsp dried oregano'],
+   steps:['Cook pasta per packet. Reserve a cup of pasta water before draining.','Fry onion 5 min. Add garlic 1 min. Add mince — break up and brown thoroughly.','Add chopped tomatoes and oregano. Simmer 15 min.','Stir in spinach to wilt. Add pasta with a splash of pasta water. Toss and serve.'],
+   tip:'High-carb and high-protein — ideal after Saturday\'s long run.'},
+  {id:'r9',name:'Salmon + Greens + Rice',emoji:'🐟',time:'30 min',serves:1,tags:['dinner'],
+   ingredients:['1 salmon fillet','80g brown rice (dry)','150g tenderstem broccoli','1 tbsp soy sauce','1 tsp sesame oil','Lemon wedge'],
+   steps:['Cook brown rice per packet (about 25 min).','Season and pan-fry salmon 4–5 min each side, or bake at 200°C for 12 min.','Steam broccoli 4–5 min until just tender.','Mix soy sauce and sesame oil. Plate rice, broccoli, salmon. Drizzle. Squeeze lemon.'],
+   tip:'Buy 2 fillets — refrigerate the second for early next week.'},
+  {id:'r10',name:'Post-Run Recovery Smoothie',emoji:'🥤',time:'3 min',serves:1,tags:['snack','post-run','no-cook','quick'],
+   ingredients:['1 banana','250ml oat milk (or any milk)','1 scoop protein powder or 2 tbsp Greek yoghurt','Handful frozen berries','1 tsp honey (optional)'],
+   steps:['Add everything to a blender.','Blend 30 seconds until smooth.','Drink immediately.'],
+   tip:'Within 30 minutes of finishing your run. Chocolate milk works just as well — same carb-to-protein ratio, zero prep.'},
+];
+
+const DEFAULT_WISDOM = [
+  {id:'w1',text:"You don't need anyone's approval to start. The courage to begin is already inside you.",source:'',tags:['courage','mindset'],rotation:true},
+  {id:'w2',text:"Your past does not determine who you are. Right now, in this moment, you can choose differently.",source:'',tags:['mindset','letting go'],rotation:true},
+  {id:'w3',text:"Letting go of the need to control the outcome is where your real power begins.",source:'The Courage to Be Disliked',tags:['letting go','self-worth'],rotation:true},
+  {id:'w4',text:"Run for you, not for anyone else. Your effort belongs entirely to you.",source:'',tags:['running','mindset'],rotation:true},
+  {id:'w5',text:"You are not the sum of what happened to you. You are the sum of what you choose to do next.",source:'',tags:['healing','mindset'],rotation:true},
+  {id:'w6',text:"Freedom is choosing your response. You lace up the shoes. You put one foot in front of the other.",source:'',tags:['courage','running'],rotation:true},
+  {id:'w7',text:"Life is a series of moments, each lived now. This run, this meal, this breath — they are the whole of it.",source:'',tags:['mindset','gratitude'],rotation:true},
+  {id:'w8',text:"Healing is not about becoming someone else. It is about becoming so fully yourself that nothing can shake your ground.",source:'Detached',tags:['healing','self-worth'],rotation:true},
+  {id:'w9',text:"Detachment is not indifference. It is the quiet confidence of someone who knows their own worth.",source:'Detached',tags:['self-worth','letting go'],rotation:true},
+  {id:'w10',text:"The version of you that finishes this race is not found on race day. They are forged in the ordinary days.",source:'',tags:['running','courage'],rotation:true},
+  {id:'w11',text:"When you stop performing for others, you become magnetic. Show up for yourself first.",source:'Detached',tags:['self-worth','mindset'],rotation:true},
+  {id:'w12',text:"Rest is not weakness. The willingness to recover is the mark of a serious athlete and a serious person.",source:'',tags:['running','mindset'],rotation:true},
+  {id:'w13',text:"You are not obligated to be the same person you were yesterday. Every day you get to choose again.",source:'',tags:['mindset','healing'],rotation:true},
+  {id:'w14',text:"What you let go of creates space for what you are becoming. Let today be light.",source:'',tags:['letting go','healing'],rotation:true},
+  {id:'w15',text:"When you are fully present in your body, nothing else exists. This is what running gives you.",source:'',tags:['running','mindset'],rotation:true},
+  {id:'w16',text:"Consistency is a form of self-respect. Every session is a vote for the person you are becoming.",source:'',tags:['running','self-worth'],rotation:true},
+  {id:'w17',text:"The finish line is earned in the weeks nobody sees. Today is one of those weeks.",source:'',tags:['running','courage'],rotation:true},
+  {id:'w18',text:"You have already survived your hardest days. This is just training.",source:'',tags:['courage','healing'],rotation:true},
+  {id:'w19',text:"Stillness is strength. A quiet mind finishes races that a loud one abandons.",source:'',tags:['mindset','running'],rotation:true},
+];
+
+// ══════════════════════════════════════════════════════════════════════════════
+// STORAGE
+// ══════════════════════════════════════════════════════════════════════════════
+
+function loadData(key, fallback) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
+  catch(e) { return fallback; }
+}
+function saveData(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+// Day log stored per date string YYYY-MM-DD
+function dayKey(date) {
+  return 'day-' + dateStr(date);
+}
+function loadDay(date) {
+  return loadData(dayKey(date), {habits:{},todos:['','','','',''],todoDone:[false,false,false,false,false],contrib:['','',''],bestday:['','',''],notes:''});
+}
+function saveDay(date, data) {
+  saveData(dayKey(date), data);
+}
+
+let RECIPES = loadData('recipes', null);
+if (!RECIPES) { RECIPES = DEFAULT_RECIPES; saveData('recipes', RECIPES); }
+
+let WISDOM = loadData('wisdom', null);
+if (!WISDOM) { WISDOM = DEFAULT_WISDOM; saveData('wisdom', WISDOM); }
+
+function saveRecipes() { saveData('recipes', RECIPES); }
+function saveWisdom()  { saveData('wisdom',  WISDOM);  }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// DATE HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+function sod(d) { const c=new Date(d); c.setHours(0,0,0,0); return c; }
+function addDays(d,n) { const c=new Date(d); c.setDate(c.getDate()+n); return c; }
+function dateStr(d) { return sod(d).toISOString().slice(0,10); }
+function sameDay(a,b) { return dateStr(a)===dateStr(b); }
+function weekNum(date) { return Math.max(1, Math.floor((sod(date)-sod(PROG_START))/(7*86400000))+1); }
+function dow(date) { return (date.getDay()+6)%7; } // Mon=0
+function daysToRace(date) { return Math.max(0, Math.ceil((sod(RACE_DATE)-sod(date))/86400000)); }
+function getPhase(wk) { return PHASES.find(p=>wk>=p.wks[0]&&wk<=p.wks[1])||null; }
+function isInProg(date) { return sod(date)>=sod(PROG_START) && sod(date)<=sod(RACE_DATE); }
+
+function fmtDate(date) {
+  return date.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+}
+function fmtShort(date) {
+  return date.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+const DAY_NAMES = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+function getRunForDay(wk, dowIdx, date) {
+  if (sameDay(date, RACE_DATE)) return {type:'🏁 Race Day',detail:'Great North Run — 1:45:00 target. You\'ve done the work. Trust it.'};
+  if (dowIdx === 2) {
+    const idx = Math.abs(Math.floor((sod(date)-sod(PROG_START))/86400000)) % CROSS_OPTS.length;
+    return {type:'Cross Train',detail:CROSS_OPTS[idx]};
+  }
+  if (wk>=9&&wk<=13 && PHASE3_RUNS[dowIdx]) return PHASE3_RUNS[dowIdx];
+  if (wk>=14&&wk<=17 && PHASE4_RUNS[dowIdx]) return PHASE4_RUNS[dowIdx];
+  if (wk>=18 && PHASE5_RUNS[dowIdx]) return PHASE5_RUNS[dowIdx];
+  return RUN_SCHEDULE[dowIdx] || {type:'Rest Day',detail:'Rest'};
+}
+
+function getRemindersForDate(date) {
+  const pool = WISDOM.filter(w=>w.rotation);
+  if (!pool.length) return [];
+  const d = Math.abs(Math.floor((sod(date)-sod(PROG_START))/86400000));
+  const r1 = pool[d % pool.length];
+  const r2 = pool[(d + Math.max(3,Math.floor(pool.length/3))) % pool.length];
+  return r1===r2 ? [r1] : [r1,r2];
+}
+
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════════════
+
+let currentDate = sod(new Date());
+let activeTab   = 'planner';
+let dayData     = loadDay(currentDate);
+
+let recipeFilter  = 'all';
+let recipeSearch  = '';
+let wisdomFilter  = 'all';
+let wisdomSearch  = '';
+
+let editingRecipeId = null;
+let editingWisdomId = null;
+let viewingRecipeId = null;
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER HELPERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+function el(id) { return document.getElementById(id); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// HEADER
+// ══════════════════════════════════════════════════════════════════════════════
+
+function renderHeader() {
+  el('hdr-date').textContent = fmtDate(currentDate);
+  const wk = weekNum(currentDate);
+  const phase = getPhase(wk);
+  const inProg = isInProg(currentDate);
+  const habDone = HABITS.filter(h=>dayData.habits[h.id]).length;
+
+  if (inProg && phase) {
+    el('hdr-sub').textContent = `Week ${wk} of ${TOTAL_WKS} · ${phase.name}`;
+    el('phase-tag').textContent = phase.name;
+    el('phase-tag').style.cssText = `background:${phase.bg};color:${phase.accent};border-color:${phase.border};`;
+  } else if (sameDay(currentDate, RACE_DATE)) {
+    el('hdr-sub').textContent = '🏁 Race Day!';
+    el('phase-tag').textContent = 'Race Day';
+  } else {
+    const dr = daysToRace(currentDate);
+    if (dr > 0) {
+      el('hdr-sub').textContent = `${dr} days to race`;
+    } else {
+      el('hdr-sub').textContent = 'Post-race · Daily Wellness';
+    }
+    el('phase-tag').textContent = dr>0 ? `${dr}d to go` : '✓ Done it';
+    el('phase-tag').style.cssText = '';
+  }
+
+  el('habit-count').textContent = `${habDone}/${HABITS.length}`;
+  el('habit-fill').style.width = `${(habDone/HABITS.length)*100}%`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PLANNER
+// ══════════════════════════════════════════════════════════════════════════════
+
+function renderWeekStrip() {
+  const d0 = addDays(currentDate, -dow(currentDate));
+  let html = '';
+  for (let i=0;i<7;i++) {
+    const d = addDays(d0,i);
+    const on = sameDay(d,currentDate) ? 'on' : '';
+    const isToday = sameDay(d,sod(new Date()));
+    const dot = isToday ? '<div class="dc-dot"></div>' : '';
+    html += `<div class="day-cell ${on}" data-date="${dateStr(d)}">
+      <div class="dc-n">${DAY_NAMES[i]}</div>
+      <div class="dc-d">${d.getDate()}</div>
+      ${dot}
+    </div>`;
+  }
+  el('week-strip').innerHTML = html;
+  el('week-strip').querySelectorAll('.day-cell').forEach(c=>{
+    c.addEventListener('click',()=>{ navigateTo(new Date(c.dataset.date+'T00:00:00')); });
+  });
+}
+
+function renderRunBlock() {
+  const wk = weekNum(currentDate);
+  const dowIdx = dow(currentDate);
+  const run = getRunForDay(wk, dowIdx, currentDate);
+  const phase = getPhase(wk);
+  const inProg = isInProg(currentDate);
+  const dr = daysToRace(currentDate);
+
+  const bg     = phase ? phase.bg     : 'var(--cream3)';
+  const border = phase ? phase.border : 'var(--border)';
+  const accent = phase ? phase.accent : 'var(--ink3)';
+  const pname  = phase ? phase.name   : (dr<=0 ? 'Post-Race' : 'Pre-Programme');
+
+  el('run-block').innerHTML = `
+    <div class="run-block" style="background:${bg};border-color:${border};">
+      <div class="run-phase" style="color:${accent};">${inProg?pname.toUpperCase():'DAILY WELLNESS'}</div>
+      <div class="run-type">${run.type}</div>
+      <div class="run-detail">${esc(run.detail)}</div>
+      <div class="run-foot">
+        ${inProg ? `<span>Week ${wk} of ${TOTAL_WKS}</span><span>${dr} days to race</span>` : '<span>Keep moving 🏃</span>'}
+      </div>
+    </div>`;
+}
+
+function renderReminders() {
+  const items = getRemindersForDate(currentDate);
+  let html = '';
+  items.forEach(w=>{
+    html += `<div class="callout" style="margin-bottom:8px;background:var(--cream);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 16px;">
+      <p style="font-family:'Lora',serif;font-style:italic;font-size:13px;line-height:1.85;color:var(--ink);">"${esc(w.text)}"</p>
+    </div>`;
+  });
+  html += `<div class="callout lav">
+    <div class="callout-lbl">Daily Mantra</div>
+    <p>${esc(MANTRA)}</p>
+  </div>`;
+  el('reminders-block').innerHTML = html;
+}
+
+function renderTodos() {
+  let html = '';
+  for (let i=0;i<5;i++) {
+    const done = dayData.todoDone[i]||false;
+    const val  = esc(dayData.todos[i]||'');
+    html += `<div class="todo-row">
+      <div class="tcheck ${done?'on':''}" data-ti="${i}">${done?'✓':''}</div>
+      <input type="text" class="todo-input ${done?'struck':''}" data-ti="${i}" value="${val}" placeholder="Task ${i+1}…">
+    </div>`;
+  }
+  el('todo-items').innerHTML = html;
+
+  el('todo-items').querySelectorAll('.tcheck').forEach(c=>{
+    c.addEventListener('click',()=>{
+      const i = parseInt(c.dataset.ti);
+      if (!dayData.todos[i]) return;
+      dayData.todoDone[i] = !dayData.todoDone[i];
+      saveDay(currentDate, dayData);
+      renderTodos();
+    });
+  });
+  el('todo-items').querySelectorAll('.todo-input').forEach(inp=>{
+    inp.addEventListener('input',()=>{
+      dayData.todos[parseInt(inp.dataset.ti)] = inp.value;
+      saveDay(currentDate, dayData);
+    });
+  });
+}
+
+function renderMeals() {
+  // Show a curated set of recipes relevant to running goals
+  const tags = ['breakfast','lunch','dinner','post-run'];
+  let html = '';
+  tags.forEach(tag=>{
+    const list = RECIPES.filter(r=>r.tags.includes(tag)).slice(0,tag==='breakfast'?1:2);
+    if (!list.length) return;
+    const label = tag==='post-run'?'Post-Run Snack':tag.charAt(0).toUpperCase()+tag.slice(1);
+    html += `<div style="margin-bottom:12px;">
+      <div class="sec-label" style="margin-bottom:6px;">${label}</div>
+      <div class="card-list">`;
+    list.forEach(r=>{
+      html += `<div class="card" data-recipe-view="${r.id}" style="cursor:pointer;">
+        <div class="card-row">
+          <div class="card-emoji">${esc(r.emoji||'🍽️')}</div>
+          <div class="card-body">
+            <div class="card-title">${esc(r.name)}</div>
+            <div class="card-sub">${esc(r.time)} · ${r.ingredients.slice(0,2).join(', ')}${r.ingredients.length>2?'…':''}</div>
+          </div>
+          <div class="card-arrow">→</div>
+        </div>
+      </div>`;
+    });
+    html += '</div></div>';
+  });
+  if (!html) html = '<div class="empty"><div class="empty-icon">🥘</div>Add recipes in the Kitchen tab</div>';
+  el('meals-block').innerHTML = html;
+  el('meals-block').querySelectorAll('[data-recipe-view]').forEach(c=>{
+    c.addEventListener('click',()=>openRecipeView(c.dataset.recipeView));
+  });
+}
+
+function renderHabits() {
+  let html = '';
+  HABITS.forEach(h=>{
+    const on = dayData.habits[h.id] ? 'on' : '';
+    html += `<div class="check-row ${on}" data-habit="${h.id}">
+      <div class="cbox">${on?'✓':''}</div>
+      <div class="check-lbl">${h.label}</div>
+    </div>`;
+  });
+  el('habits-block').innerHTML = html;
+  el('habits-block').querySelectorAll('.check-row').forEach(row=>{
+    row.addEventListener('click',()=>{
+      const hid = row.dataset.habit;
+      dayData.habits[hid] = !dayData.habits[hid];
+      saveDay(currentDate, dayData);
+      renderHabits();
+      renderHeader();
+    });
+  });
+}
+
+function renderContrib() {
+  [1,2,3].forEach(n=>{
+    const inp = document.querySelector(`[data-contrib="${n}"]`);
+    if (inp) {
+      inp.value = dayData.contrib[n-1]||'';
+      inp.oninput = ()=>{ dayData.contrib[n-1]=inp.value; saveDay(currentDate,dayData); };
+    }
+  });
+}
+
+function renderBestDay() {
+  [1,2,3].forEach(n=>{
+    const inp = document.querySelector(`[data-bestday="${n}"]`);
+    if (inp) {
+      inp.value = dayData.bestday[n-1]||'';
+      inp.oninput = ()=>{ dayData.bestday[n-1]=inp.value; saveDay(currentDate,dayData); };
+    }
+  });
+}
+
+function renderNotes() {
+  const f = el('notes-field');
+  f.value = dayData.notes||'';
+  f.oninput = ()=>{ dayData.notes=f.value; saveDay(currentDate,dayData); };
+}
+
+function renderPlanner() {
+  renderWeekStrip();
+  renderRunBlock();
+  renderReminders();
+  renderTodos();
+  renderHabits();
+  renderContrib();
+  renderBestDay();
+  renderNotes();
+}
+
+function navigateTo(date) {
+  currentDate = sod(date);
+  dayData = loadDay(currentDate);
+  renderHeader();
+  renderPlanner();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// KITCHEN
+// ══════════════════════════════════════════════════════════════════════════════
+
+function renderKitchen() {
+  // Filters
+  const allTags = ['all',...RECIPE_TAGS];
+  el('recipe-filters').innerHTML = allTags.map(t=>
+    `<div class="filter-pill ${recipeFilter===t?'on':''}" data-rf="${t}">${t}</div>`
+  ).join('');
+  el('recipe-filters').querySelectorAll('[data-rf]').forEach(p=>{
+    p.addEventListener('click',()=>{ recipeFilter=p.dataset.rf; renderKitchen(); });
+  });
+
+  const q = recipeSearch.toLowerCase();
+  const list = RECIPES.filter(r=>{
+    const matchTag = recipeFilter==='all' || r.tags.includes(recipeFilter);
+    const matchQ   = !q || r.name.toLowerCase().includes(q) || r.tags.join(' ').toLowerCase().includes(q);
+    return matchTag && matchQ;
+  });
+
+  el('recipe-count').textContent = `${list.length} recipe${list.length!==1?'s':''}`;
+
+  if (!list.length) {
+    el('recipe-list').innerHTML = `<div class="empty"><div class="empty-icon">🥘</div>No recipes found</div>`;
+    return;
+  }
+  el('recipe-list').innerHTML = list.map(r=>`
+    <div class="card" data-recipe-view="${r.id}" style="cursor:pointer;">
+      <div class="card-row">
+        <div class="card-emoji">${esc(r.emoji||'🍽️')}</div>
+        <div class="card-body">
+          <div class="card-title">${esc(r.name)}</div>
+          <div class="card-sub">${esc(r.time||'')}${r.serves?` · Serves ${r.serves}`:''}</div>
+          <div class="card-tags">${(r.tags||[]).map(t=>`<span class="tag sage">${t}</span>`).join('')}</div>
+        </div>
+        <div class="card-arrow">→</div>
+      </div>
+    </div>`).join('');
+
+  el('recipe-list').querySelectorAll('[data-recipe-view]').forEach(c=>{
+    c.addEventListener('click',()=>openRecipeView(c.dataset.recipeView));
+  });
+}
+
+function openRecipeView(id) {
+  const r = RECIPES.find(x=>x.id===id);
+  if (!r) return;
+  viewingRecipeId = id;
+  el('recipe-modal-body').innerHTML = `
+    <div class="modal-handle"></div>
+    <div style="position:relative;">
+      <button class="modal-close" id="rview-close">✕</button>
+    </div>
+    <div class="recipe-detail">
+      <div class="recipe-hero">${esc(r.emoji||'🍽️')}</div>
+      <h2 class="lora" style="font-size:22px;font-weight:500;text-align:center;margin-bottom:8px;">${esc(r.name)}</h2>
+      <div class="recipe-meta">
+        ${r.time?`<span class="tag blue">${esc(r.time)}</span>`:''}
+        ${r.serves?`<span class="tag blue">Serves ${r.serves}</span>`:''}
+        ${(r.tags||[]).map(t=>`<span class="tag sage">${t}</span>`).join('')}
+      </div>
+      <div class="sec-label">Ingredients</div>
+      <div style="margin-bottom:18px;">${(r.ingredients||[]).map(i=>`
+        <div class="ing-item"><span class="ing-dash">–</span><span>${esc(i)}</span></div>`).join('')}
+      </div>
+      <div class="sec-label">Method</div>
+      <div style="margin-bottom:18px;">${(r.steps||[]).map((s,i)=>`
+        <div class="method-step">
+          <span class="step-num">${i+1}</span>
+          <span class="step-text">${esc(s)}</span>
+        </div>`).join('')}
+      </div>
+      ${r.tip?`<div class="callout amber"><div class="callout-lbl">Tip</div><p>${esc(r.tip)}</p></div>`:''}
+      <div class="btn-row mt12">
+        <button class="btn btn-ghost" id="rview-edit" style="flex:1;">✏️ Edit Recipe</button>
+      </div>
+    </div>`;
+  el('recipe-modal').classList.remove('hidden');
+  el('rview-close').addEventListener('click',()=>el('recipe-modal').classList.add('hidden'));
+  el('rview-edit').addEventListener('click',()=>{ el('recipe-modal').classList.add('hidden'); openRecipeForm(id); });
+}
+
+function openRecipeForm(id) {
+  editingRecipeId = id||null;
+  const r = id ? RECIPES.find(x=>x.id===id) : null;
+  el('recipe-form-title').textContent = r ? 'Edit Recipe' : 'New Recipe';
+  el('rf-name').value       = r?.name||'';
+  el('rf-emoji').value      = r?.emoji||'';
+  el('rf-time').value       = r?.time||'';
+  el('rf-serves').value     = r?.serves||'';
+  el('rf-tip').value        = r?.tip||'';
+  el('rf-ingredients').value= (r?.ingredients||[]).join('\n');
+  el('rf-steps').value      = (r?.steps||[]).join('\n');
+
+  // Tags
+  el('recipe-tag-picker').innerHTML = RECIPE_TAGS.map(t=>`
+    <div class="tag-opt ${(r?.tags||[]).includes(t)?'on':''}" data-rtag="${t}">${t}</div>`).join('');
+  el('recipe-tag-picker').querySelectorAll('[data-rtag]').forEach(opt=>{
+    opt.addEventListener('click',()=>opt.classList.toggle('on'));
+  });
+
+  // Delete button
+  el('rf-delete-wrap').innerHTML = r
+    ? `<button class="btn btn-danger btn-full btn-sm" id="rf-delete">Delete Recipe</button>` : '';
+  if (r) el('rf-delete').addEventListener('click',()=>{
+    if (!confirm('Delete this recipe?')) return;
+    RECIPES = RECIPES.filter(x=>x.id!==id);
+    saveRecipes();
+    el('recipe-form-modal').classList.add('hidden');
+    renderKitchen();
+  });
+
+  el('recipe-form-modal').classList.remove('hidden');
+}
+
+function saveRecipeForm() {
+  const name = el('rf-name').value.trim();
+  if (!name) { alert('Please enter a recipe name'); return; }
+  const tags = [...el('recipe-tag-picker').querySelectorAll('.tag-opt.on')].map(o=>o.dataset.rtag);
+  const ingredients = el('rf-ingredients').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const steps       = el('rf-steps').value.split('\n').map(s=>s.trim()).filter(Boolean);
+
+  if (editingRecipeId) {
+    const idx = RECIPES.findIndex(r=>r.id===editingRecipeId);
+    if (idx>-1) RECIPES[idx] = {...RECIPES[idx],name,emoji:el('rf-emoji').value.trim()||'🍽️',time:el('rf-time').value.trim(),serves:parseInt(el('rf-serves').value)||1,tags,ingredients,steps,tip:el('rf-tip').value.trim()};
+  } else {
+    RECIPES.push({id:uid(),name,emoji:el('rf-emoji').value.trim()||'🍽️',time:el('rf-time').value.trim(),serves:parseInt(el('rf-serves').value)||1,tags,ingredients,steps,tip:el('rf-tip').value.trim()});
+  }
+  saveRecipes();
+  el('recipe-form-modal').classList.add('hidden');
+  renderKitchen();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WISDOM
+// ══════════════════════════════════════════════════════════════════════════════
+
+function renderWisdom() {
+  const allTags = ['all',...WISDOM_TAGS];
+  el('wisdom-filters').innerHTML = allTags.map(t=>
+    `<div class="filter-pill ${wisdomFilter===t?'on':''}" data-wf="${t}">${t}</div>`).join('');
+  el('wisdom-filters').querySelectorAll('[data-wf]').forEach(p=>{
+    p.addEventListener('click',()=>{ wisdomFilter=p.dataset.wf; renderWisdom(); });
+  });
+
+  const q = wisdomSearch.toLowerCase();
+  const list = WISDOM.filter(w=>{
+    const matchTag = wisdomFilter==='all'||(w.tags||[]).includes(wisdomFilter);
+    const matchQ   = !q||w.text.toLowerCase().includes(q)||(w.source||'').toLowerCase().includes(q);
+    return matchTag&&matchQ;
+  });
+
+  el('wisdom-count').textContent = `${list.length} entr${list.length!==1?'ies':'y'}`;
+
+  if (!list.length) {
+    el('wisdom-list').innerHTML = `<div class="empty"><div class="empty-icon">✨</div>No entries found</div>`;
+    return;
+  }
+
+  el('wisdom-list').innerHTML = list.map(w=>`
+    <div class="quote-card">
+      <div class="quote-text">"${esc(w.text)}"</div>
+      <div class="quote-foot">
+        <div style="display:flex;flex-wrap:wrap;gap:4px;">
+          ${w.source?`<span class="tag lav">${esc(w.source)}</span>`:''}
+          ${(w.tags||[]).map(t=>`<span class="tag sage">${t}</span>`).join('')}
+          ${w.rotation?`<span class="tag blue">in rotation</span>`:''}
+        </div>
+        <div class="quote-actions">
+          <button class="icon-btn" data-edit-w="${w.id}">✏️</button>
+        </div>
+      </div>
+    </div>`).join('');
+
+  el('wisdom-list').querySelectorAll('[data-edit-w]').forEach(b=>{
+    b.addEventListener('click',()=>openWisdomForm(b.dataset.editW));
+  });
+}
+
+function openWisdomForm(id) {
+  editingWisdomId = id||null;
+  const w = id ? WISDOM.find(x=>x.id===id) : null;
+  el('wisdom-form-title').textContent = w ? 'Edit Entry' : 'New Entry';
+  el('wf-text').value   = w?.text||'';
+  el('wf-source').value = w?.source||'';
+  el('wf-rotation').checked = w ? (w.rotation!==false) : true;
+
+  el('wisdom-tag-picker').innerHTML = WISDOM_TAGS.map(t=>`
+    <div class="tag-opt ${(w?.tags||[]).includes(t)?'on':''}" data-wtag="${t}">${t}</div>`).join('');
+  el('wisdom-tag-picker').querySelectorAll('[data-wtag]').forEach(opt=>{
+    opt.addEventListener('click',()=>opt.classList.toggle('on'));
+  });
+
+  el('wf-delete-wrap').innerHTML = w
+    ? `<button class="btn btn-danger btn-full btn-sm" id="wf-delete">Delete Entry</button>` : '';
+  if (w) el('wf-delete').addEventListener('click',()=>{
+    if (!confirm('Delete this entry?')) return;
+    WISDOM = WISDOM.filter(x=>x.id!==id);
+    saveWisdom();
+    el('wisdom-form-modal').classList.add('hidden');
+    renderWisdom();
+    if (activeTab==='planner') renderReminders();
+  });
+
+  el('wisdom-form-modal').classList.remove('hidden');
+}
+
+function saveWisdomForm() {
+  const text = el('wf-text').value.trim();
+  if (!text) { alert('Please enter some text'); return; }
+  const tags = [...el('wisdom-tag-picker').querySelectorAll('.tag-opt.on')].map(o=>o.dataset.wtag);
+  const entry = {text,source:el('wf-source').value.trim(),tags,rotation:el('wf-rotation').checked};
+
+  if (editingWisdomId) {
+    const idx = WISDOM.findIndex(w=>w.id===editingWisdomId);
+    if (idx>-1) WISDOM[idx] = {...WISDOM[idx],...entry};
+  } else {
+    WISDOM.push({id:uid(),...entry});
+  }
+  saveWisdom();
+  el('wisdom-form-modal').classList.add('hidden');
+  renderWisdom();
+  if (activeTab==='planner') renderReminders();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// SETTINGS / EXPORT
+// ══════════════════════════════════════════════════════════════════════════════
+
+function renderSettings() {
+  let dayCount = 0;
+  for (let i=0;i<localStorage.length;i++) {
+    if (localStorage.key(i).startsWith('day-')) dayCount++;
+  }
+  el('data-stats').innerHTML = `
+    <span class="stat-pill">📅 ${dayCount} day logs</span>
+    <span class="stat-pill">🥘 ${RECIPES.length} recipes</span>
+    <span class="stat-pill">✨ ${WISDOM.length} wisdom entries</span>`;
+  // Wire up Google Drive UI (safe to call multiple times)
+  setTimeout(() => wireGdriveSettings(), 0);
+}
+
+function exportData() {
+  const days = {};
+  for (let i=0;i<localStorage.length;i++) {
+    const k = localStorage.key(i);
+    if (k.startsWith('day-')) {
+      try { days[k] = JSON.parse(localStorage.getItem(k)); } catch(e) {}
+    }
+  }
+  const payload = {
+    exportedAt: new Date().toISOString(),
+    version: 2,
+    recipes: RECIPES,
+    wisdom:  WISDOM,
+    days,
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `daily-planner-backup-${dateStr(new Date())}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = e=>{
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.recipes) { RECIPES = data.recipes; saveRecipes(); }
+      if (data.wisdom)  { WISDOM  = data.wisdom;  saveWisdom();  }
+      if (data.days) {
+        Object.entries(data.days).forEach(([k,v])=>{
+          localStorage.setItem(k,JSON.stringify(v));
+        });
+      }
+      alert('Import successful!');
+      dayData = loadDay(currentDate);
+      renderAll();
+    } catch(err) {
+      alert('Import failed — please check the file is a valid backup.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ══════════════════════════════════════════════════════════════════════════════
+
+function switchTab(tab) {
+  activeTab = tab;
+  ['planner','kitchen','wisdom','settings'].forEach(t=>{
+    el(`tab-${t}`).classList.toggle('hidden', t!==tab);
+  });
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.classList.toggle('on', b.dataset.tab===tab);
+  });
+  if (tab==='kitchen')  renderKitchen();
+  if (tab==='wisdom')   renderWisdom();
+  if (tab==='settings') renderSettings();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════════════════════════════════════════════
+
+function renderAll() {
+  renderHeader();
+  renderPlanner();
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// EVENT LISTENERS
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Tab buttons
+document.querySelectorAll('.tab-btn').forEach(b=>{
+  b.addEventListener('click',()=>switchTab(b.dataset.tab));
+});
+
+// Day nav
+el('btn-prev').addEventListener('click',()=>navigateTo(addDays(currentDate,-1)));
+el('btn-next').addEventListener('click',()=>navigateTo(addDays(currentDate,1)));
+el('btn-today').addEventListener('click',()=>navigateTo(sod(new Date())));
+
+// Recipe
+el('btn-add-recipe').addEventListener('click',()=>openRecipeForm(null));
+el('recipe-form-close').addEventListener('click',()=>el('recipe-form-modal').classList.add('hidden'));
+el('rf-save').addEventListener('click',saveRecipeForm);
+el('rf-cancel').addEventListener('click',()=>el('recipe-form-modal').classList.add('hidden'));
+el('recipe-modal').addEventListener('click',e=>{ if(e.target===el('recipe-modal'))el('recipe-modal').classList.add('hidden'); });
+el('recipe-search').addEventListener('input',e=>{ recipeSearch=e.target.value; renderKitchen(); });
+
+// Wisdom
+el('btn-add-wisdom').addEventListener('click',()=>openWisdomForm(null));
+el('wisdom-form-close').addEventListener('click',()=>el('wisdom-form-modal').classList.add('hidden'));
+el('wf-save').addEventListener('click',saveWisdomForm);
+el('wf-cancel').addEventListener('click',()=>el('wisdom-form-modal').classList.add('hidden'));
+el('wisdom-search').addEventListener('input',e=>{ wisdomSearch=e.target.value; renderWisdom(); });
+
+// Export / import
+el('btn-export').addEventListener('click',exportData);
+el('btn-import-trigger').addEventListener('click',()=>el('import-file').click());
+el('import-file').addEventListener('change',e=>{ if(e.target.files[0]) importData(e.target.files[0]); e.target.value=''; });
+
+// Close modals on overlay tap
+el('wisdom-form-modal').addEventListener('click',e=>{ if(e.target===el('wisdom-form-modal'))el('wisdom-form-modal').classList.add('hidden'); });
+el('recipe-form-modal').addEventListener('click',e=>{ if(e.target===el('recipe-form-modal'))el('recipe-form-modal').classList.add('hidden'); });
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GOOGLE DRIVE SYNC
+// (injected above renderAll so sync patches saveDay etc before first use)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════════════════════════════════
+// GOOGLE DRIVE SYNC
+// ══════════════════════════════════════════════════════════════════════════════
+
+const GD_FILE_NAME  = 'daily-planner-data.json';
+const GD_SCOPES     = 'https://www.googleapis.com/auth/drive.file';
+const GD_DISCOVERY  = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+
+let gdClientId   = loadData('gd-client-id', '');
+let gdToken      = loadData('gd-token', null);   // {access_token, expiry_ms}
+let gdFileId     = loadData('gd-file-id', '');
+let gdLastSync   = loadData('gd-last-sync', 0);
+let gdConnected  = false;
+let gdSyncing    = false;
+let gdTokenClient = null;
+let gdGapiReady   = false;
+
+// ── Status bar helpers ────────────────────────────────────────────────────────
+function setSyncStatus(state, text) {
+  const dot = el('sync-dot');
+  const lbl = el('sync-label');
+  if (!dot) return;
+  dot.className = 'sync-dot' + (state ? ' ' + state : '');
+  lbl.textContent = text;
+  el('sync-bar').classList.remove('hidden');
+}
+
+function tokenExpired() {
+  return !gdToken || Date.now() > gdToken.expiry_ms - 60000;
+}
+
+// ── Load Google APIs ──────────────────────────────────────────────────────────
+function loadGoogleApis(clientId) {
+  return new Promise((resolve, reject) => {
+    // Load gapi
+    const gapiScript = document.createElement('script');
+    gapiScript.src = 'https://apis.google.com/js/api.js';
+    gapiScript.onload = () => {
+      gapi.load('client', async () => {
+        try {
+          await gapi.client.init({
+            discoveryDocs: [GD_DISCOVERY],
+          });
+          gdGapiReady = true;
+          resolve();
+        } catch(e) { reject(e); }
+      });
+    };
+    gapiScript.onerror = reject;
+    document.head.appendChild(gapiScript);
+
+    // Load GIS (token client)
+    const gisScript = document.createElement('script');
+    gisScript.src = 'https://accounts.google.com/gsi/client';
+    gisScript.onload = () => {
+      gdTokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: clientId,
+        scope: GD_SCOPES,
+        callback: (resp) => {
+          if (resp.error) {
+            setSyncStatus('err', 'Sign-in failed — try again');
+            return;
+          }
+          gdToken = {
+            access_token: resp.access_token,
+            expiry_ms: Date.now() + (resp.expires_in * 1000),
+          };
+          saveData('gd-token', gdToken);
+          gdConnected = true;
+          gapi.client.setToken({access_token: gdToken.access_token});
+          setSyncStatus('busy', 'Signed in — syncing…');
+          gdSync().then(() => {
+            updateSettingsGdriveUI();
+          });
+        },
+      });
+    };
+    document.head.appendChild(gisScript);
+  });
+}
+
+// ── Connect ───────────────────────────────────────────────────────────────────
+async function gdConnect() {
+  if (!gdClientId) return;
+  setSyncStatus('busy', 'Loading Google APIs…');
+  try {
+    await loadGoogleApis(gdClientId);
+    // If we have a non-expired token, go straight to sync
+    if (!tokenExpired()) {
+      gapi.client.setToken({access_token: gdToken.access_token});
+      gdConnected = true;
+      setSyncStatus('busy', 'Reconnecting…');
+      await gdSync();
+      updateSettingsGdriveUI();
+    } else {
+      setSyncStatus('busy', 'Waiting for sign-in…');
+      gdTokenClient.requestAccessToken({prompt: ''});
+    }
+  } catch(e) {
+    setSyncStatus('err', 'Failed to load Google APIs');
+    console.error(e);
+  }
+}
+
+// ── Disconnect ────────────────────────────────────────────────────────────────
+function gdDisconnect() {
+  if (gdToken) {
+    try { google.accounts.oauth2.revoke(gdToken.access_token, ()=>{}); } catch(e) {}
+  }
+  gdToken = null; gdConnected = false;
+  saveData('gd-token', null);
+  setSyncStatus('', 'Disconnected from Google Drive');
+  el('sync-bar').classList.add('hidden');
+  updateSettingsGdriveUI();
+}
+
+// ── Find or create file ────────────────────────────────────────────────────────
+async function gdGetOrCreateFile() {
+  if (gdFileId) {
+    // Verify it still exists
+    try {
+      await gapi.client.drive.files.get({fileId: gdFileId, fields: 'id'});
+      return gdFileId;
+    } catch(e) {
+      gdFileId = ''; saveData('gd-file-id', '');
+    }
+  }
+  // Search for existing file
+  const res = await gapi.client.drive.files.list({
+    q: `name='${GD_FILE_NAME}' and trashed=false`,
+    fields: 'files(id,name)',
+    spaces: 'drive',
+  });
+  if (res.result.files && res.result.files.length > 0) {
+    gdFileId = res.result.files[0].id;
+    saveData('gd-file-id', gdFileId);
+    return gdFileId;
+  }
+  // Create new file
+  const meta = await gapi.client.request({
+    path: 'https://www.googleapis.com/drive/v3/files',
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({name: GD_FILE_NAME, mimeType: 'application/json'}),
+  });
+  gdFileId = meta.result.id;
+  saveData('gd-file-id', gdFileId);
+  return gdFileId;
+}
+
+// ── Build full payload ─────────────────────────────────────────────────────────
+function buildPayload() {
+  const days = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('day-')) {
+      try { days[k] = JSON.parse(localStorage.getItem(k)); } catch(e) {}
+    }
+  }
+  return { version: 2, updatedAt: new Date().toISOString(), recipes: RECIPES, wisdom: WISDOM, days };
+}
+
+// ── Upload ────────────────────────────────────────────────────────────────────
+async function gdUpload(fileId, payload) {
+  await gapi.client.request({
+    path: `https://www.googleapis.com/upload/drive/v3/files/${fileId}`,
+    method: 'PATCH',
+    params: {uploadType: 'media'},
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(payload),
+  });
+}
+
+// ── Download ──────────────────────────────────────────────────────────────────
+async function gdDownload(fileId) {
+  const res = await gapi.client.drive.files.get({
+    fileId,
+    alt: 'media',
+  });
+  return typeof res.result === 'string' ? JSON.parse(res.result) : res.result;
+}
+
+// ── Merge remote into local ───────────────────────────────────────────────────
+function mergeRemote(remote) {
+  let changed = false;
+  if (remote.recipes && Array.isArray(remote.recipes)) {
+    // Merge: remote wins for matching IDs, add any remote-only entries
+    const localMap = Object.fromEntries(RECIPES.map(r=>[r.id,r]));
+    remote.recipes.forEach(rr => {
+      if (!localMap[rr.id] || new Date(remote.updatedAt) > new Date(gdLastSync || 0)) {
+        localMap[rr.id] = rr;
+        changed = true;
+      }
+    });
+    RECIPES = Object.values(localMap);
+    saveRecipes();
+  }
+  if (remote.wisdom && Array.isArray(remote.wisdom)) {
+    const localMap = Object.fromEntries(WISDOM.map(w=>[w.id,w]));
+    remote.wisdom.forEach(rw => {
+      if (!localMap[rw.id] || new Date(remote.updatedAt) > new Date(gdLastSync || 0)) {
+        localMap[rw.id] = rw;
+        changed = true;
+      }
+    });
+    WISDOM = Object.values(localMap);
+    saveWisdom();
+  }
+  if (remote.days) {
+    Object.entries(remote.days).forEach(([k,v]) => {
+      const existing = localStorage.getItem(k);
+      if (!existing) {
+        localStorage.setItem(k, JSON.stringify(v));
+        changed = true;
+      }
+    });
+  }
+  return changed;
+}
+
+// ── Main sync ─────────────────────────────────────────────────────────────────
+async function gdSync() {
+  if (gdSyncing || !gdConnected) return;
+  if (tokenExpired()) {
+    gdTokenClient.requestAccessToken({prompt: ''});
+    return;
+  }
+  gdSyncing = true;
+  setSyncStatus('busy', 'Syncing…');
+  try {
+    const fileId = await gdGetOrCreateFile();
+    // Try to download existing data and merge
+    try {
+      const remote = await gdDownload(fileId);
+      const changed = mergeRemote(remote);
+      if (changed) {
+        dayData = loadDay(currentDate);
+        renderAll();
+      }
+    } catch(e) {
+      // File exists but is empty or unreadable — that's fine, we'll overwrite
+    }
+    // Upload current state
+    await gdUpload(fileId, buildPayload());
+    gdLastSync = Date.now();
+    saveData('gd-last-sync', gdLastSync);
+    const t = new Date(gdLastSync).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+    setSyncStatus('ok', `Synced · ${t}`);
+  } catch(e) {
+    console.error('Sync error', e);
+    setSyncStatus('err', 'Sync failed — tap to retry');
+  } finally {
+    gdSyncing = false;
+  }
+}
+
+// ── Auto-sync on data change ──────────────────────────────────────────────────
+let syncTimer = null;
+function scheduleSync() {
+  if (!gdConnected) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => gdSync(), 3000); // 3s debounce
+}
+
+// Patch saveDay / saveRecipes / saveWisdom to trigger sync
+const _origSaveDay     = saveDay;
+const _origSaveRecipes = saveRecipes;
+const _origSaveWisdom  = saveWisdom;
+function saveDay(d, data)  { _origSaveDay(d, data);     scheduleSync(); }
+function saveRecipes()     { _origSaveRecipes();         scheduleSync(); }
+function saveWisdom()      { _origSaveWisdom();          scheduleSync(); }
+
+// ── Settings UI ───────────────────────────────────────────────────────────────
+function updateSettingsGdriveUI() {
+  const hasClientId = !!gdClientId;
+  el('gdrive-no-client').classList.toggle('hidden', hasClientId);
+  el('gdrive-has-client').classList.toggle('hidden', !hasClientId);
+  el('gdrive-connected-ui').classList.toggle('hidden', !gdConnected);
+  el('gdrive-disconnected-ui').classList.toggle('hidden', gdConnected);
+  el('gdrive-setup-guide').classList.toggle('hidden', hasClientId);
+
+  if (gdConnected) {
+    if (el('gd-sync-pill')) {
+      const t = gdLastSync ? new Date(gdLastSync).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : 'Never';
+      el('gd-sync-pill').textContent = `Last sync: ${t}`;
+    }
+  }
+}
+
+// ── Settings event wiring (called inside renderSettings) ──────────────────────
+function wireGdriveSettings() {
+  updateSettingsGdriveUI();
+
+  const saveClientBtn = el('btn-save-client-id');
+  if (saveClientBtn && !saveClientBtn._wired) {
+    saveClientBtn._wired = true;
+    saveClientBtn.addEventListener('click', () => {
+      const val = el('client-id-input').value.trim();
+      if (!val || !val.includes('.apps.googleusercontent.com')) {
+        alert('Please paste a valid Google Client ID — it should end with .apps.googleusercontent.com');
+        return;
+      }
+      gdClientId = val;
+      saveData('gd-client-id', gdClientId);
+      updateSettingsGdriveUI();
+      gdConnect();
+    });
+  }
+
+  const connectBtn = el('btn-gdrive-connect');
+  if (connectBtn && !connectBtn._wired) {
+    connectBtn._wired = true;
+    connectBtn.addEventListener('click', () => gdConnect());
+  }
+
+  const disconnectBtn = el('btn-gdrive-disconnect');
+  if (disconnectBtn && !disconnectBtn._wired) {
+    disconnectBtn._wired = true;
+    disconnectBtn.addEventListener('click', () => {
+      if (confirm('Disconnect Google Drive? Your local data will stay on this device.')) gdDisconnect();
+    });
+  }
+
+  const syncNowBtn = el('btn-sync-now');
+  if (syncNowBtn && !syncNowBtn._wired) {
+    syncNowBtn._wired = true;
+    syncNowBtn.addEventListener('click', () => gdSync());
+  }
+}
+
+// Sync-now button in header
+el('sync-now-btn').addEventListener('click', () => gdSync());
+
+// ── Auto-connect on load if we have credentials ───────────────────────────────
+if (gdClientId) {
+  // Small delay to let the rest of the app init first
+  setTimeout(() => gdConnect(), 800);
+}
+
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════════════
+
+renderAll();
+</script>
+</body>
+</html>
