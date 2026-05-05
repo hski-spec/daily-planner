@@ -945,9 +945,20 @@ function dayKey(date) {
   return 'day-' + dateStr(date);
 }
 function loadDay(date) {
-  return loadData(dayKey(date), {habits:{},todos:['','','','',''],todoDone:[false,false,false,false,false],contrib:['','',''],bestday:['','',''],notes:''});
+  const defaults = {habits:{},todos:['','','','',''],todoDone:[false,false,false,false,false],contrib:['','',''],bestday:['','',''],notes:''};
+  const stored = loadData(dayKey(date), null);
+  if (!stored) return defaults;
+  // Merge with defaults so any missing keys are always present
+  return {
+    habits:   (stored.habits && typeof stored.habits === 'object') ? stored.habits : {},
+    todos:    Array.isArray(stored.todos)    ? stored.todos    : defaults.todos,
+    todoDone: Array.isArray(stored.todoDone) ? stored.todoDone : defaults.todoDone,
+    contrib:  Array.isArray(stored.contrib)  ? stored.contrib  : defaults.contrib,
+    bestday:  Array.isArray(stored.bestday)  ? stored.bestday  : defaults.bestday,
+    notes:    typeof stored.notes === 'string' ? stored.notes  : '',
+  };
 }
-function saveDay(date, data) {
+function _saveDay(date, data) {
   saveData(dayKey(date), data);
 }
 
@@ -957,8 +968,8 @@ if (!RECIPES) { RECIPES = DEFAULT_RECIPES; saveData('recipes', RECIPES); }
 let WISDOM = loadData('wisdom', null);
 if (!WISDOM) { WISDOM = DEFAULT_WISDOM; saveData('wisdom', WISDOM); }
 
-function saveRecipes() { saveData('recipes', RECIPES); }
-function saveWisdom()  { saveData('wisdom',  WISDOM);  }
+function _saveRecipes() { saveData('recipes', RECIPES); }
+function _saveWisdom()  { saveData('wisdom',  WISDOM);  }
 
 // ══════════════════════════════════════════════════════════════════════════════
 // DATE HELPERS
@@ -1140,7 +1151,10 @@ function renderTodos() {
   el('todo-items').querySelectorAll('.tcheck').forEach(c=>{
     c.addEventListener('click',()=>{
       const i = parseInt(c.dataset.ti);
-      if (!dayData.todos[i]) return;
+      // Read the live input value rather than stale dayData — fixes blank-on-load bug
+      const liveInput = el('todo-items').querySelector(`.todo-input[data-ti="${i}"]`);
+      const liveVal   = liveInput ? liveInput.value.trim() : (dayData.todos[i]||'').trim();
+      if (!liveVal) return; // still block ticking a genuinely empty task
       dayData.todoDone[i] = !dayData.todoDone[i];
       saveDay(currentDate, dayData);
       renderTodos();
@@ -1187,9 +1201,11 @@ function renderMeals() {
 }
 
 function renderHabits() {
+  // Guard: ensure habits is always a plain object
+  if (!dayData.habits || typeof dayData.habits !== 'object') dayData.habits = {};
   let html = '';
   HABITS.forEach(h=>{
-    const on = dayData.habits[h.id] ? 'on' : '';
+    const on = !!dayData.habits[h.id] ? 'on' : '';
     html += `<div class="check-row ${on}" data-habit="${h.id}">
       <div class="cbox">${on?'✓':''}</div>
       <div class="check-lbl">${h.label}</div>
@@ -1197,8 +1213,11 @@ function renderHabits() {
   });
   el('habits-block').innerHTML = html;
   el('habits-block').querySelectorAll('.check-row').forEach(row=>{
-    row.addEventListener('click',()=>{
+    row.addEventListener('click', e=>{
+      // Prevent any parent elements stealing the event
+      e.stopPropagation();
       const hid = row.dataset.habit;
+      if (!dayData.habits || typeof dayData.habits !== 'object') dayData.habits = {};
       dayData.habits[hid] = !dayData.habits[hid];
       saveDay(currentDate, dayData);
       renderHabits();
@@ -2150,13 +2169,10 @@ function scheduleSync() {
   syncTimer = setTimeout(() => gdSync(), 3000); // 3s debounce
 }
 
-// Patch saveDay / saveRecipes / saveWisdom to trigger sync
-const _origSaveDay     = saveDay;
-const _origSaveRecipes = saveRecipes;
-const _origSaveWisdom  = saveWisdom;
-function saveDay(d, data)  { _origSaveDay(d, data);     scheduleSync(); }
-function saveRecipes()     { _origSaveRecipes();         scheduleSync(); }
-function saveWisdom()      { _origSaveWisdom();          scheduleSync(); }
+// Single clean save functions — call internal _save* then schedule sync
+function saveDay(d, data)  { _saveDay(d, data);     scheduleSync(); }
+function saveRecipes()     { _saveRecipes();         scheduleSync(); }
+function saveWisdom()      { _saveWisdom();          scheduleSync(); }
 
 // ── Settings UI ───────────────────────────────────────────────────────────────
 function updateSettingsGdriveUI() {
